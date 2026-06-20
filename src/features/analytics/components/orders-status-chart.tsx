@@ -1,0 +1,92 @@
+import { Loader2 } from 'lucide-react'
+import {
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from 'recharts'
+import { useAnalyticsOrders } from '@/hooks/api/use-analytics'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+
+const STATUS_COLORS: Record<string, string> = {
+  delivered: '#22c55e',
+  processing: '#3b82f6',
+  shipped: '#a855f7',
+  pending: '#eab308',
+  cancelled: '#ef4444',
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  delivered: 'Delivered',
+  processing: 'Processing',
+  shipped: 'Shipped',
+  pending: 'Pending',
+  cancelled: 'Cancelled',
+}
+
+interface StatusPoint {
+  status: string
+  total: number
+}
+
+export function OrdersStatusChart() {
+  const { data, isLoading } = useAnalyticsOrders()
+  const byStatus: StatusPoint[] = data?.data?.by_status ?? []
+
+  const chartData = byStatus.map((p) => ({
+    name: STATUS_LABELS[p.status] ?? p.status,
+    value: Number(p.total),
+    status: p.status,
+  }))
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Orders by Status</CardTitle>
+        <CardDescription>Distribution of all platform orders</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className='flex h-[300px] items-center justify-center'>
+            <Loader2 className='h-6 w-6 animate-spin text-muted-foreground' />
+          </div>
+        ) : chartData.length === 0 ? (
+          <div className='flex h-[300px] items-center justify-center'>
+            <p className='text-sm text-muted-foreground'>No orders yet.</p>
+          </div>
+        ) : (
+          <ResponsiveContainer width='100%' height={300}>
+            <PieChart>
+              <Pie
+                data={chartData}
+                cx='50%'
+                cy='50%'
+                innerRadius={70}
+                outerRadius={110}
+                paddingAngle={3}
+                dataKey='value'
+              >
+                {chartData.map((entry, idx) => (
+                  <Cell
+                    key={idx}
+                    fill={STATUS_COLORS[entry.status] ?? '#94a3b8'}
+                  />
+                ))}
+              </Pie>
+              <Tooltip formatter={(v, n) => [v, n]} />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
