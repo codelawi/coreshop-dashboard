@@ -6,6 +6,8 @@ import {
   Store,
   Tag,
   BarChart3,
+  Image,
+  Layers,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -60,6 +62,21 @@ export const sidebarData: SidebarData = {
           title: 'Analytics',
           url: '/analytics',
           icon: BarChart3,
+        },
+      ],
+    },
+    {
+      title: 'Content',
+      items: [
+        {
+          title: 'Banners',
+          url: '/banners',
+          icon: Image,
+        },
+        {
+          title: 'Categories',
+          url: '/categories',
+          icon: Layers,
         },
       ],
     },
