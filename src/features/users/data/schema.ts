@@ -20,8 +20,18 @@ const _userSchema = z.object({
   name: z.string(),
   email: z.string(),
   phone: z.string().nullable(),
+  avatar: z.string().nullable().optional(),
   status: userStatusSchema,
   role: userRoleSchema,
+  store: z
+    .object({
+      id: z.number(),
+      name: z.string(),
+      status: z.string(),
+      logo: z.string().nullable(),
+    })
+    .nullable()
+    .optional(),
   created_at: z.string(),
 })
 export type User = z.infer<typeof _userSchema>

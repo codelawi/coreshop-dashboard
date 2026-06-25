@@ -2,7 +2,7 @@ import { Loader2 } from 'lucide-react'
 import { useProducts } from '@/hooks/api/use-products'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
+
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { ProductsTable } from './components/products-table'
@@ -18,7 +18,7 @@ export function Products() {
         <div className='ms-auto flex items-center gap-2'>
           <Search />
           <ThemeSwitch />
-          <ProfileDropdown />
+          
         </div>
       </Header>
 

@@ -2,10 +2,11 @@ import { Loader2 } from 'lucide-react'
 import { useUsers } from '@/hooks/api/use-users'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { UsersDialogs } from './components/users-dialogs'
 import { UsersTable } from './components/users-table'
+import { UsersProvider } from './components/users-provider'
 import type { User } from './data/schema'
 
 export function Users() {
@@ -13,11 +14,10 @@ export function Users() {
   const users: User[] = data?.data ?? []
 
   return (
-    <>
+    <UsersProvider>
       <Header fixed>
         <Search className='me-auto' />
         <ThemeSwitch />
-        <ProfileDropdown />
       </Header>
 
       <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
@@ -37,6 +37,8 @@ export function Users() {
           <UsersTable data={users} />
         )}
       </Main>
-    </>
+
+      <UsersDialogs />
+    </UsersProvider>
   )
 }

@@ -1,6 +1,10 @@
 import type { ColumnDef } from '@tanstack/react-table'
+import { Link } from '@tanstack/react-router'
+import { Store } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { LongText } from '@/components/long-text'
 import { callTypes, roles } from '../data/data'
@@ -25,9 +29,24 @@ export const usersColumns: ColumnDef<User>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Name' />
     ),
-    cell: ({ row }) => (
-      <LongText className='max-w-48'>{row.getValue('name')}</LongText>
-    ),
+    cell: ({ row }) => {
+      const { name, avatar } = row.original
+      const initials = name
+        .split(' ')
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+      return (
+        <div className='flex items-center gap-3'>
+          <Avatar className='h-8 w-8'>
+            <AvatarImage src={avatar ?? undefined} alt={name} />
+            <AvatarFallback className='text-xs'>{initials}</AvatarFallback>
+          </Avatar>
+          <LongText className='max-w-36'>{name}</LongText>
+        </div>
+      )
+    },
     enableHiding: false,
   },
   {
@@ -101,6 +120,22 @@ export const usersColumns: ColumnDef<User>[] = [
         {row.getValue('created_at')}
       </span>
     ),
+  },
+  {
+    id: 'store',
+    header: 'Store',
+    cell: ({ row }) => {
+      const store = row.original.store
+      if (!store) return <span className='text-xs text-muted-foreground'>—</span>
+      return (
+        <Button variant='outline' size='sm' className='h-7 gap-1.5 text-xs' asChild>
+          <Link to='/stores/$storeId' params={{ storeId: String(store.id) }}>
+            <Store className='h-3.5 w-3.5' />
+            {store.name}
+          </Link>
+        </Button>
+      )
+    },
   },
   {
     id: 'actions',

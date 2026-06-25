@@ -1,47 +1,38 @@
-import { UsersActionDialog } from './users-action-dialog'
-import { UsersDeleteDialog } from './users-delete-dialog'
-import { UsersInviteDialog } from './users-invite-dialog'
 import { useUsers } from './users-provider'
+import { UsersActionDialog } from './users-action-dialog'
+import { UsersBanDialog } from './users-ban-dialog'
+import { UsersDeleteDialog } from './users-delete-dialog'
 
 export function UsersDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = useUsers()
+
+  const closeWithDelay = (type: typeof open) => () => {
+    setOpen(type)
+    setTimeout(() => setCurrentRow(null), 500)
+  }
+
   return (
     <>
-      <UsersActionDialog
-        key='user-add'
-        open={open === 'add'}
-        onOpenChange={() => setOpen('add')}
-      />
-
-      <UsersInviteDialog
-        key='user-invite'
-        open={open === 'invite'}
-        onOpenChange={() => setOpen('invite')}
-      />
-
       {currentRow && (
         <>
           <UsersActionDialog
             key={`user-edit-${currentRow.id}`}
             open={open === 'edit'}
-            onOpenChange={() => {
-              setOpen('edit')
-              setTimeout(() => {
-                setCurrentRow(null)
-              }, 500)
-            }}
+            onOpenChange={closeWithDelay('edit')}
+            currentRow={currentRow}
+          />
+
+          <UsersBanDialog
+            key={`user-ban-${currentRow.id}`}
+            open={open === 'ban'}
+            onOpenChange={closeWithDelay('ban')}
             currentRow={currentRow}
           />
 
           <UsersDeleteDialog
             key={`user-delete-${currentRow.id}`}
             open={open === 'delete'}
-            onOpenChange={() => {
-              setOpen('delete')
-              setTimeout(() => {
-                setCurrentRow(null)
-              }, 500)
-            }}
+            onOpenChange={closeWithDelay('delete')}
             currentRow={currentRow}
           />
         </>

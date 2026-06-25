@@ -1,46 +1,28 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import type { Row } from '@tanstack/react-table'
-import { Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
-import { useUpdateUserStatus } from '@/hooks/api/use-users'
+import { Ban, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { User, UserStatus } from '../data/schema'
+import type { User } from '../data/schema'
+import { useUsers } from './users-provider'
 
 type DataTableRowActionsProps = {
   row: Row<User>
 }
 
-const statusOptions: { value: UserStatus; label: string }[] = [
-  { value: 'active', label: 'Mark as Active' },
-  { value: 'inactive', label: 'Mark as Inactive' },
-  { value: 'suspended', label: 'Suspend' },
-]
-
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
   const user = row.original
-  const updateStatus = useUpdateUserStatus()
+  const { setOpen, setCurrentRow } = useUsers()
 
-  const handleChange = (status: UserStatus) => {
-    if (status === user.status) return
-    updateStatus.mutate(
-      { id: user.id, status },
-      {
-        onSuccess: () => {
-          toast.success(`${user.name} is now ${status}.`)
-        },
-        onError: () => {
-          toast.error('Failed to update user status.')
-        },
-      }
-    )
+  const handleAction = (action: 'edit' | 'ban' | 'delete') => {
+    setCurrentRow(user)
+    setOpen(action)
   }
 
   return (
@@ -49,28 +31,28 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
         <Button
           variant='ghost'
           className='flex h-8 w-8 p-0 data-[state=open]:bg-muted'
-          disabled={updateStatus.isPending}
         >
-          {updateStatus.isPending ? (
-            <Loader2 className='h-4 w-4 animate-spin' />
-          ) : (
-            <DotsHorizontalIcon className='h-4 w-4' />
-          )}
+          <DotsHorizontalIcon className='h-4 w-4' />
           <span className='sr-only'>Open menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end' className='w-48'>
-        <DropdownMenuLabel>Change status</DropdownMenuLabel>
+      <DropdownMenuContent align='end' className='w-44'>
+        <DropdownMenuItem onClick={() => handleAction('edit')}>
+          <Pencil className='mr-2 h-4 w-4' />
+          Edit Account
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleAction('ban')}>
+          <Ban className='mr-2 h-4 w-4' />
+          Ban Account
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {statusOptions.map((opt) => (
-          <DropdownMenuItem
-            key={opt.value}
-            disabled={opt.value === user.status}
-            onClick={() => handleChange(opt.value)}
-          >
-            {opt.label}
-          </DropdownMenuItem>
-        ))}
+        <DropdownMenuItem
+          onClick={() => handleAction('delete')}
+          className='text-destructive focus:text-destructive'
+        >
+          <Trash2 className='mr-2 h-4 w-4' />
+          Delete Account
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
