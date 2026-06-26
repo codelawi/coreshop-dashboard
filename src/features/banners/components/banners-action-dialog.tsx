@@ -33,7 +33,7 @@ const defaultForm = {
   title: '',
   subtitle: '',
   image: '',
-  link_type: 'category' as const,
+  link_type: 'category' as 'category' | 'product' | 'store' | 'url',
   link_value: '',
   is_active: true,
   starts_at: '',

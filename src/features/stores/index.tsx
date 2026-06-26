@@ -1,4 +1,8 @@
+import { useState } from 'react'
 import { useParams, Link } from '@tanstack/react-router'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import {
   ArrowLeft,
   Store,
@@ -11,19 +15,39 @@ import {
   Loader2,
   CheckCircle2,
   XCircle,
+  Plus,
 } from 'lucide-react'
 import {
   useAdminStore,
   useAdminStoreOrders,
   useAdminStoreProducts,
+  useAdminCreateStoreProduct,
   useUpdateStoreStatus,
 } from '@/hooks/api/use-stores'
+import { useAdminCategories } from '@/hooks/api/use-categories-admin'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Table,
@@ -41,6 +65,17 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
+
+const createProductSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().optional(),
+  category_id: z.string().min(1, 'Category is required'),
+  price: z.number({ invalid_type_error: 'Required' }).min(0),
+  original_price: z.number().optional(),
+  stock: z.number({ invalid_type_error: 'Required' }).int().min(0),
+})
+
+type CreateProductForm = z.infer<typeof createProductSchema>
 
 const STATUS_COLORS: Record<string, string> = {
   active: 'bg-green-100 text-green-700 border-green-200',
@@ -78,15 +113,24 @@ function formatCurrency(v: number | string) {
 export function StoreDetail() {
   const { storeId } = useParams({ from: '/_authenticated/stores/$storeId/' })
   const id = Number(storeId)
+  const [showCreateProduct, setShowCreateProduct] = useState(false)
 
   const { data: storeData, isLoading } = useAdminStore(id)
   const { data: ordersData, isLoading: ordersLoading } = useAdminStoreOrders(id)
   const { data: productsData, isLoading: productsLoading } = useAdminStoreProducts(id)
+  const { data: categoriesData } = useAdminCategories()
   const updateStatus = useUpdateStoreStatus()
+  const createProduct = useAdminCreateStoreProduct()
 
   const store = storeData?.data
   const orders = ordersData?.data ?? []
   const products = productsData?.data ?? []
+  const categories = categoriesData?.data ?? []
+
+  const createForm = useForm<CreateProductForm>({
+    resolver: zodResolver(createProductSchema),
+    defaultValues: { name: '', description: '', category_id: '', stock: 0 },
+  })
 
   const handleStatusChange = (status: string) => {
     updateStatus.mutate(
@@ -94,6 +138,24 @@ export function StoreDetail() {
       {
         onSuccess: () => toast.success('Store status updated.'),
         onError: () => toast.error('Failed to update store status.'),
+      }
+    )
+  }
+
+  function handleCreateProduct(values: CreateProductForm) {
+    createProduct.mutate(
+      {
+        storeId: id,
+        ...values,
+        category_id: parseInt(values.category_id),
+      },
+      {
+        onSuccess: () => {
+          toast.success('Product created and approved.')
+          setShowCreateProduct(false)
+          createForm.reset()
+        },
+        onError: () => toast.error('Failed to create product.'),
       }
     )
   }
@@ -119,7 +181,7 @@ export function StoreDetail() {
       <Header>
         <div className='flex items-center gap-3'>
           <Button variant='ghost' size='icon' asChild>
-            <Link to='/users/'>
+            <Link to='/users'>
               <ArrowLeft className='h-4 w-4' />
             </Link>
           </Button>
@@ -307,8 +369,12 @@ export function StoreDetail() {
           {/* Products tab */}
           <TabsContent value='products'>
             <Card>
-              <CardHeader>
+              <CardHeader className='flex flex-row items-center justify-between'>
                 <CardTitle>Products</CardTitle>
+                <Button size='sm' onClick={() => setShowCreateProduct(true)}>
+                  <Plus className='me-1.5 h-3.5 w-3.5' />
+                  Add Product
+                </Button>
               </CardHeader>
               <CardContent className='p-0'>
                 {productsLoading ? (
@@ -412,6 +478,161 @@ export function StoreDetail() {
           </TabsContent>
         </Tabs>
       </Main>
+
+      <Dialog open={showCreateProduct} onOpenChange={setShowCreateProduct}>
+        <DialogContent className='max-w-lg'>
+          <DialogHeader>
+            <DialogTitle>Add Product to {store?.name}</DialogTitle>
+          </DialogHeader>
+          <Form {...createForm}>
+            <form
+              onSubmit={createForm.handleSubmit(handleCreateProduct)}
+              className='space-y-4'
+            >
+              <FormField
+                control={createForm.control}
+                name='name'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Product Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder='e.g. Classic White T-Shirt' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={createForm.control}
+                name='description'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder='Product description...'
+                        rows={3}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={createForm.control}
+                name='category_id'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select a category' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map((cat: any) => (
+                          <SelectItem key={cat.id} value={String(cat.id)}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className='grid grid-cols-2 gap-4'>
+                <FormField
+                  control={createForm.control}
+                  name='price'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price (JOD)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          step='0.01'
+                          min='0'
+                          placeholder='0.00'
+                          {...field}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={createForm.control}
+                  name='original_price'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Original Price (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          step='0.01'
+                          min='0'
+                          placeholder='0.00'
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value ? parseFloat(e.target.value) : undefined
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={createForm.control}
+                name='stock'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stock</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        min='0'
+                        placeholder='0'
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={() => setShowCreateProduct(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type='submit' disabled={createProduct.isPending}>
+                  {createProduct.isPending && (
+                    <Loader2 className='me-2 h-4 w-4 animate-spin' />
+                  )}
+                  Create Product
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

@@ -6,7 +6,6 @@ import { Main } from '@/components/layout/main'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import type { Category } from './data/schema'
 import { CategoryImageDialog } from './components/category-image-dialog'
 
@@ -82,7 +81,7 @@ export function Categories() {
                 <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'>
                   <CategoryCard category={parent} onEdit={handleEdit} />
                   {parent.children?.map((child) => (
-                    <CategoryCard key={child.id} category={child} onEdit={handleEdit} />
+                    <CategoryCard key={(child as Category).id} category={child as Category} onEdit={handleEdit} />
                   ))}
                 </div>
               </div>

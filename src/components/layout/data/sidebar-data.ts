@@ -8,6 +8,7 @@ import {
   BarChart3,
   Image,
   Layers,
+  CreditCard,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -62,6 +63,11 @@ export const sidebarData: SidebarData = {
           title: 'Analytics',
           url: '/analytics',
           icon: BarChart3,
+        },
+        {
+          title: 'Payment',
+          url: '/payment',
+          icon: CreditCard,
         },
       ],
     },

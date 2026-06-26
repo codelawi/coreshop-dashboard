@@ -44,6 +44,22 @@ export function useAdminStoreProducts(id: number, params?: Record<string, unknow
   })
 }
 
+export function useAdminCreateStoreProduct() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      storeId,
+      ...data
+    }: { storeId: number } & Record<string, unknown>) => {
+      const response = await api.post(`/stores/${storeId}/products`, data)
+      return response.data
+    },
+    onSuccess: (_data, { storeId }) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-store-products', storeId] })
+    },
+  })
+}
+
 export function useUpdateStoreStatus() {
   const queryClient = useQueryClient()
   return useMutation({
