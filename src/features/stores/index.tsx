@@ -70,9 +70,9 @@ const createProductSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
   category_id: z.string().min(1, 'Category is required'),
-  price: z.number({ invalid_type_error: 'Required' }).min(0),
+  price: z.number({ error: 'Required' }).min(0),
   original_price: z.number().optional(),
-  stock: z.number({ invalid_type_error: 'Required' }).int().min(0),
+  stock: z.number({ error: 'Required' }).int().min(0),
 })
 
 type CreateProductForm = z.infer<typeof createProductSchema>

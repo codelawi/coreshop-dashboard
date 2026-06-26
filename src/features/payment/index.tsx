@@ -23,14 +23,14 @@ import { toast } from 'sonner'
 
 const schema = z.object({
   platform_fee_percentage: z
-    .number({ invalid_type_error: 'Required' })
+    .number({ error: 'Required' })
     .min(0)
     .max(100),
   delivery_fee_per_km: z
-    .number({ invalid_type_error: 'Required' })
+    .number({ error: 'Required' })
     .min(0),
   delivery_fee_minimum: z
-    .number({ invalid_type_error: 'Required' })
+    .number({ error: 'Required' })
     .min(0),
 })
 

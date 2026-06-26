@@ -26,6 +26,7 @@ import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedStoresIndexRouteImport } from './routes/_authenticated/stores/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedProductsIndexRouteImport } from './routes/_authenticated/products/index'
+import { Route as AuthenticatedPaymentIndexRouteImport } from './routes/_authenticated/payment/index'
 import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders/index'
 import { Route as AuthenticatedCouponsIndexRouteImport } from './routes/_authenticated/coupons/index'
 import { Route as AuthenticatedCategoriesIndexRouteImport } from './routes/_authenticated/categories/index'
@@ -126,6 +127,12 @@ const AuthenticatedProductsIndexRoute =
     path: '/products/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPaymentIndexRoute =
+  AuthenticatedPaymentIndexRouteImport.update({
+    id: '/payment/',
+    path: '/payment/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOrdersIndexRoute =
   AuthenticatedOrdersIndexRouteImport.update({
     id: '/orders/',
@@ -216,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/categories/': typeof AuthenticatedCategoriesIndexRoute
   '/coupons/': typeof AuthenticatedCouponsIndexRoute
   '/orders/': typeof AuthenticatedOrdersIndexRoute
+  '/payment/': typeof AuthenticatedPaymentIndexRoute
   '/products/': typeof AuthenticatedProductsIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/stores/': typeof AuthenticatedStoresIndexRoute
@@ -244,6 +252,7 @@ export interface FileRoutesByTo {
   '/categories': typeof AuthenticatedCategoriesIndexRoute
   '/coupons': typeof AuthenticatedCouponsIndexRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
+  '/payment': typeof AuthenticatedPaymentIndexRoute
   '/products': typeof AuthenticatedProductsIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/stores': typeof AuthenticatedStoresIndexRoute
@@ -275,6 +284,7 @@ export interface FileRoutesById {
   '/_authenticated/categories/': typeof AuthenticatedCategoriesIndexRoute
   '/_authenticated/coupons/': typeof AuthenticatedCouponsIndexRoute
   '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
+  '/_authenticated/payment/': typeof AuthenticatedPaymentIndexRoute
   '/_authenticated/products/': typeof AuthenticatedProductsIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/stores/': typeof AuthenticatedStoresIndexRoute
@@ -306,6 +316,7 @@ export interface FileRouteTypes {
     | '/categories/'
     | '/coupons/'
     | '/orders/'
+    | '/payment/'
     | '/products/'
     | '/settings/'
     | '/stores/'
@@ -334,6 +345,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/coupons'
     | '/orders'
+    | '/payment'
     | '/products'
     | '/settings'
     | '/stores'
@@ -364,6 +376,7 @@ export interface FileRouteTypes {
     | '/_authenticated/categories/'
     | '/_authenticated/coupons/'
     | '/_authenticated/orders/'
+    | '/_authenticated/payment/'
     | '/_authenticated/products/'
     | '/_authenticated/settings/'
     | '/_authenticated/stores/'
@@ -506,6 +519,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProductsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/payment/': {
+      id: '/_authenticated/payment/'
+      path: '/payment'
+      fullPath: '/payment/'
+      preLoaderRoute: typeof AuthenticatedPaymentIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/orders/': {
       id: '/_authenticated/orders/'
       path: '/orders'
@@ -618,6 +638,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCategoriesIndexRoute: typeof AuthenticatedCategoriesIndexRoute
   AuthenticatedCouponsIndexRoute: typeof AuthenticatedCouponsIndexRoute
   AuthenticatedOrdersIndexRoute: typeof AuthenticatedOrdersIndexRoute
+  AuthenticatedPaymentIndexRoute: typeof AuthenticatedPaymentIndexRoute
   AuthenticatedProductsIndexRoute: typeof AuthenticatedProductsIndexRoute
   AuthenticatedStoresIndexRoute: typeof AuthenticatedStoresIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
@@ -633,6 +654,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCategoriesIndexRoute: AuthenticatedCategoriesIndexRoute,
   AuthenticatedCouponsIndexRoute: AuthenticatedCouponsIndexRoute,
   AuthenticatedOrdersIndexRoute: AuthenticatedOrdersIndexRoute,
+  AuthenticatedPaymentIndexRoute: AuthenticatedPaymentIndexRoute,
   AuthenticatedProductsIndexRoute: AuthenticatedProductsIndexRoute,
   AuthenticatedStoresIndexRoute: AuthenticatedStoresIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
