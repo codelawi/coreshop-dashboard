@@ -139,7 +139,7 @@ export function Categories() {
 
   const createForm = useForm<CreateForm>({
     resolver: zodResolver(createSchema),
-    defaultValues: { name: '', parent_id: '', is_active: true },
+    defaultValues: { name: '', parent_id: 'none', is_active: true },
   })
 
   const openEdit = (cat: Category) => {
@@ -169,7 +169,7 @@ export function Categories() {
     createCategory.mutate(
       {
         name: values.name,
-        parent_id: values.parent_id ? parseInt(values.parent_id) : undefined,
+        parent_id: values.parent_id && values.parent_id !== 'none' ? parseInt(values.parent_id) : undefined,
         is_active: values.is_active,
       },
       {
@@ -363,7 +363,7 @@ export function Categories() {
                     <FormLabel>Parent Category (optional)</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      value={field.value ?? ''}
+                      value={field.value ?? 'none'}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -371,7 +371,7 @@ export function Categories() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value=''>Top-level category</SelectItem>
+                        <SelectItem value='none'>Top-level category</SelectItem>
                         {categories.map((cat) => (
                           <SelectItem key={cat.id} value={String(cat.id)}>
                             {cat.name}

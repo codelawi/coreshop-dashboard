@@ -103,7 +103,7 @@ export function OrderDetailSheet({
             <p className='text-sm'>Order not found.</p>
           </div>
         ) : (
-          <div className='mt-4 space-y-6'>
+          <div className='mt-4 space-y-6 px-4 pb-6'>
             {/* Status + Change */}
             <div className='flex items-center justify-between gap-4'>
               <Badge
