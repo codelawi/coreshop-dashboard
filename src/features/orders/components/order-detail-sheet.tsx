@@ -2,7 +2,6 @@ import { Loader2, ShoppingBag } from 'lucide-react'
 import { toast } from 'sonner'
 import { useOrder, useUpdateOrderStatus } from '@/hooks/api/use-orders'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import {
   Select,

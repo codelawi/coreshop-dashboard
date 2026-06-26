@@ -25,6 +25,7 @@ import {
   useUpdateStoreStatus,
 } from '@/hooks/api/use-stores'
 import { useAdminCategories } from '@/hooks/api/use-categories-admin'
+import { usePaymentSettings } from '@/hooks/api/use-settings'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ThemeSwitch } from '@/components/theme-switch'
@@ -119,6 +120,7 @@ export function StoreDetail() {
   const { data: ordersData, isLoading: ordersLoading } = useAdminStoreOrders(id)
   const { data: productsData, isLoading: productsLoading } = useAdminStoreProducts(id)
   const { data: categoriesData } = useAdminCategories()
+  const { data: paymentSettings } = usePaymentSettings()
   const updateStatus = useUpdateStoreStatus()
   const createProduct = useAdminCreateStoreProduct()
 
@@ -126,6 +128,7 @@ export function StoreDetail() {
   const orders = ordersData?.data ?? []
   const products = productsData?.data ?? []
   const categories = categoriesData?.data ?? []
+  const platformFeePercent = paymentSettings?.platform_fee_percentage ?? 10
 
   const createForm = useForm<CreateProductForm>({
     resolver: zodResolver(createProductSchema),
@@ -464,17 +467,85 @@ export function StoreDetail() {
 
           {/* Payments tab */}
           <TabsContent value='payments'>
-            <Card>
-              <CardHeader>
-                <CardTitle>Payments</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className='flex h-40 flex-col items-center justify-center gap-2 text-muted-foreground'>
-                  <DollarSign className='h-8 w-8 opacity-30' />
-                  <p className='text-sm'>Payout management coming soon.</p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className='space-y-4'>
+              {/* Earnings summary */}
+              <div className='grid gap-4 sm:grid-cols-3'>
+                {(() => {
+                  const gross = Number(store.total_revenue ?? 0)
+                  const fee = Math.round(gross * (platformFeePercent / 100) * 100) / 100
+                  const net = Math.round((gross - fee) * 100) / 100
+                  return [
+                    { label: 'Gross Revenue', value: formatCurrency(gross), color: '' },
+                    { label: `Platform Fee (${platformFeePercent}%)`, value: `−${formatCurrency(fee)}`, color: 'text-destructive' },
+                    { label: 'Net Earnings', value: formatCurrency(net), color: 'text-green-600' },
+                  ].map((item) => (
+                    <Card key={item.label}>
+                      <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                        <CardTitle className='text-sm font-medium'>{item.label}</CardTitle>
+                        <DollarSign className='h-4 w-4 text-muted-foreground' />
+                      </CardHeader>
+                      <CardContent>
+                        <div className={`text-2xl font-bold ${item.color}`}>{item.value}</div>
+                      </CardContent>
+                    </Card>
+                  ))
+                })()}
+              </div>
+
+              {/* Completed orders with payment info */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Completed Orders</CardTitle>
+                </CardHeader>
+                <CardContent className='p-0'>
+                  {(() => {
+                    const completed = orders.filter((o: any) =>
+                      ['delivered', 'completed'].includes(o.status)
+                    )
+                    if (completed.length === 0) {
+                      return (
+                        <p className='p-6 text-center text-sm text-muted-foreground'>
+                          No completed orders yet.
+                        </p>
+                      )
+                    }
+                    return (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Order</TableHead>
+                            <TableHead>Customer</TableHead>
+                            <TableHead>Gross</TableHead>
+                            <TableHead>Fee ({platformFeePercent}%)</TableHead>
+                            <TableHead>Net</TableHead>
+                            <TableHead>Date</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {completed.map((order: any) => {
+                            const gross = Number(order.total ?? 0)
+                            const deliveryFee = Number(order.delivery_fee ?? 0)
+                            const sellerGross = gross - deliveryFee
+                            const fee = Math.round(sellerGross * (platformFeePercent / 100) * 100) / 100
+                            const net = Math.round((sellerGross - fee) * 100) / 100
+                            return (
+                              <TableRow key={order.id}>
+                                <TableCell className='font-mono text-sm'>#{order.id}</TableCell>
+                                <TableCell>{order.client?.name ?? '—'}</TableCell>
+                                <TableCell>{formatCurrency(sellerGross)}</TableCell>
+                                <TableCell className='text-destructive'>−{formatCurrency(fee)}</TableCell>
+                                <TableCell className='font-semibold text-green-600'>{formatCurrency(net)}</TableCell>
+                                <TableCell className='text-muted-foreground'>{order.created_at}</TableCell>
+                              </TableRow>
+                            )
+                          })}
+                        </TableBody>
+                      </Table>
+                    )
+                  })()}
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </Main>
