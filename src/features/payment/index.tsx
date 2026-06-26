@@ -50,11 +50,11 @@ export function PaymentSettings() {
   })
 
   useEffect(() => {
-    if (data?.data) {
+    if (data) {
       form.reset({
-        platform_fee_percentage: data.data.platform_fee_percentage,
-        delivery_fee_per_km: data.data.delivery_fee_per_km,
-        delivery_fee_minimum: data.data.delivery_fee_minimum,
+        platform_fee_percentage: data.platform_fee_percentage,
+        delivery_fee_per_km: data.delivery_fee_per_km,
+        delivery_fee_minimum: data.delivery_fee_minimum,
       })
     }
   }, [data, form])

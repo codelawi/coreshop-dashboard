@@ -64,7 +64,7 @@ export function ProductDetailSheet({
             <p className='text-sm'>Product not found.</p>
           </div>
         ) : (
-          <div className='mt-4 space-y-6'>
+          <div className='mt-4 space-y-6 px-4 pb-6'>
             {/* Images */}
             {product.images?.length > 0 && (
               <div className='flex gap-2 overflow-x-auto pb-1'>
