@@ -11,6 +11,17 @@ export function useProducts(params?: Record<string, unknown>) {
   })
 }
 
+export function useAdminProduct(id: number) {
+  return useQuery({
+    queryKey: ['product', id],
+    queryFn: async () => {
+      const response = await api.get(`/products/${id}`)
+      return response.data
+    },
+    enabled: !!id,
+  })
+}
+
 export function useUpdateProductStatus() {
   const queryClient = useQueryClient()
   return useMutation({

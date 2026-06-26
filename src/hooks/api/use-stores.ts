@@ -60,6 +60,19 @@ export function useAdminCreateStoreProduct() {
   })
 }
 
+export function useAdminCreateStore() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: Record<string, unknown>) => {
+      const response = await api.post('/stores', data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-stores'] })
+    },
+  })
+}
+
 export function useUpdateStoreStatus() {
   const queryClient = useQueryClient()
   return useMutation({

@@ -1,7 +1,18 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import { CheckCircle, Flag, Trash2, Loader2 } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle, Eye, Loader2, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useUpdateProductStatus } from '@/hooks/api/use-products'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,6 +23,7 @@ import {
 } from '@/components/ui/tooltip'
 import { DataTableColumnHeader } from '@/components/data-table/column-header'
 import type { Product, ProductStatus } from '../data/schema'
+import { ProductDetailSheet } from './product-detail-sheet'
 
 type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive'
 
@@ -31,17 +43,28 @@ const statusLabel: Record<ProductStatus, string> = {
 
 function ProductRowActions({ product }: { product: Product }) {
   const updateStatus = useUpdateProductStatus()
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [detailOpen, setDetailOpen] = useState(false)
 
-  const handle = (status: ProductStatus, label: string) => {
+  const handleApprove = () => {
     updateStatus.mutate(
-      { id: product.id, status },
+      { id: product.id, status: 'approved' },
+      {
+        onSuccess: () => toast.success(`Product "${product.name}" approved.`),
+        onError: () => toast.error('Failed to update product status.'),
+      }
+    )
+  }
+
+  const handleRemove = () => {
+    updateStatus.mutate(
+      { id: product.id, status: 'removed' },
       {
         onSuccess: () => {
-          toast.success(`Product "${product.name}" ${label}.`)
+          toast.success(`Product "${product.name}" removed.`)
+          setConfirmOpen(false)
         },
-        onError: () => {
-          toast.error('Failed to update product status.')
-        },
+        onError: () => toast.error('Failed to remove product.'),
       }
     )
   }
@@ -57,55 +80,84 @@ function ProductRowActions({ product }: { product: Product }) {
   const status = product.status
 
   return (
-    <TooltipProvider delayDuration={100}>
-      <div className='flex items-center gap-1'>
-        {status === 'pending_review' && (
+    <>
+      <TooltipProvider delayDuration={100}>
+        <div className='flex items-center gap-1'>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 size='icon'
                 variant='ghost'
-                className='h-8 w-8 text-green-600 hover:bg-green-50 hover:text-green-700'
-                onClick={() => handle('approved', 'approved')}
+                className='h-8 w-8'
+                onClick={() => setDetailOpen(true)}
               >
-                <CheckCircle className='h-4 w-4' />
+                <Eye className='h-4 w-4' />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Approve</TooltipContent>
+            <TooltipContent>Manage</TooltipContent>
           </Tooltip>
-        )}
-        {status !== 'flagged' && status !== 'removed' && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size='icon'
-                variant='ghost'
-                className='h-8 w-8 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700'
-                onClick={() => handle('flagged', 'flagged')}
-              >
-                <Flag className='h-4 w-4' />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Flag</TooltipContent>
-          </Tooltip>
-        )}
-        {status !== 'removed' && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size='icon'
-                variant='ghost'
-                className='h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive'
-                onClick={() => handle('removed', 'removed')}
-              >
-                <Trash2 className='h-4 w-4' />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Remove</TooltipContent>
-          </Tooltip>
-        )}
-      </div>
-    </TooltipProvider>
+
+          {status === 'pending_review' && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size='icon'
+                  variant='ghost'
+                  className='h-8 w-8 text-green-600 hover:bg-green-50 hover:text-green-700'
+                  onClick={handleApprove}
+                >
+                  <CheckCircle className='h-4 w-4' />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Approve</TooltipContent>
+            </Tooltip>
+          )}
+
+          {status !== 'removed' && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size='icon'
+                  variant='ghost'
+                  className='h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive'
+                  onClick={() => setConfirmOpen(true)}
+                >
+                  <Trash2 className='h-4 w-4' />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Remove</TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      </TooltipProvider>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove product?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will mark <strong>{product.name}</strong> as removed and hide
+              it from the platform. This can be undone by changing the status.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className='bg-destructive text-white hover:bg-destructive/90'
+              onClick={handleRemove}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <ProductDetailSheet
+        productId={product.id}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+      />
+    </>
   )
 }
 
@@ -157,7 +209,7 @@ export const productsColumns: ColumnDef<Product>[] = [
     ),
     cell: ({ row }) => {
       const price = Number(row.getValue('price'))
-      return <span className='font-medium'>${price.toFixed(2)}</span>
+      return <span className='font-medium'>JOD {price.toFixed(2)}</span>
     },
   },
   {

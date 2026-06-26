@@ -1,5 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal, Loader2 } from 'lucide-react'
+import { useState } from 'react'
+import { Eye, Loader2, MoreHorizontal } from 'lucide-react'
 import { toast } from 'sonner'
 import { useUpdateOrderStatus } from '@/hooks/api/use-orders'
 import { Badge } from '@/components/ui/badge'
@@ -12,8 +13,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { DataTableColumnHeader } from '@/components/data-table/column-header'
 import type { Order, OrderStatus } from '../data/schema'
+import { OrderDetailSheet } from './order-detail-sheet'
 
 type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive'
 
@@ -58,6 +66,7 @@ const allStatuses: OrderStatus[] = [
 
 function OrderRowActions({ order }: { order: Order }) {
   const updateStatus = useUpdateOrderStatus()
+  const [detailOpen, setDetailOpen] = useState(false)
 
   const handleChange = (status: OrderStatus) => {
     if (status === order.status) return
@@ -75,36 +84,62 @@ function OrderRowActions({ order }: { order: Order }) {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant='ghost'
-          size='icon'
-          className='h-8 w-8'
-          disabled={updateStatus.isPending}
-        >
-          {updateStatus.isPending ? (
-            <Loader2 className='h-4 w-4 animate-spin' />
-          ) : (
-            <MoreHorizontal className='h-4 w-4' />
-          )}
-          <span className='sr-only'>Open menu</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align='end'>
-        <DropdownMenuLabel>Change status</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {allStatuses.map((status) => (
-          <DropdownMenuItem
-            key={status}
-            disabled={status === order.status}
-            onClick={() => handleChange(status)}
-          >
-            {statusLabel[status]}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <div className='flex items-center gap-1'>
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='h-8 w-8'
+                onClick={() => setDetailOpen(true)}
+              >
+                <Eye className='h-4 w-4' />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Manage Order</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-8 w-8'
+              disabled={updateStatus.isPending}
+            >
+              {updateStatus.isPending ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : (
+                <MoreHorizontal className='h-4 w-4' />
+              )}
+              <span className='sr-only'>Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='end'>
+            <DropdownMenuLabel>Change status</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {allStatuses.map((status) => (
+              <DropdownMenuItem
+                key={status}
+                disabled={status === order.status}
+                onClick={() => handleChange(status)}
+              >
+                {statusLabel[status]}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <OrderDetailSheet
+        orderId={order.id}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+      />
+    </>
   )
 }
 

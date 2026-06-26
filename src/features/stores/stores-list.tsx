@@ -1,21 +1,42 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import {
   CheckCircle2,
   ExternalLink,
   Loader2,
+  Plus,
   Search,
   Star,
   Store,
   XCircle,
 } from 'lucide-react'
-import { useAdminStores } from '@/hooks/api/use-stores'
+import { toast } from 'sonner'
+import { useAdminStores, useAdminCreateStore } from '@/hooks/api/use-stores'
+import { useUsers } from '@/hooks/api/use-users'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -24,6 +45,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Table,
   TableBody,
@@ -40,9 +62,21 @@ const STATUS_COLORS: Record<string, string> = {
   closed: 'bg-gray-100 text-gray-600 border-gray-200',
 }
 
+const createStoreSchema = z.object({
+  seller_id: z.string().min(1, 'Seller is required'),
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().optional(),
+  phone: z.string().optional(),
+  city: z.string().optional(),
+  address: z.string().optional(),
+})
+
+type CreateStoreForm = z.infer<typeof createStoreSchema>
+
 export function Stores() {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<string>('all')
+  const [createOpen, setCreateOpen] = useState(false)
 
   const { data, isLoading } = useAdminStores({
     search: search || undefined,
@@ -50,7 +84,46 @@ export function Stores() {
     per_page: 50,
   })
 
+  const { data: usersData } = useUsers({ role: 'seller', per_page: 100 })
+
+  const createStore = useAdminCreateStore()
+
   const stores = data?.data ?? []
+
+  const form = useForm<CreateStoreForm>({
+    resolver: zodResolver(createStoreSchema),
+    defaultValues: {
+      seller_id: '',
+      name: '',
+      description: '',
+      phone: '',
+      city: '',
+      address: '',
+    },
+  })
+
+  const handleCreate = (values: CreateStoreForm) => {
+    createStore.mutate(
+      {
+        seller_id: parseInt(values.seller_id),
+        name: values.name,
+        description: values.description || undefined,
+        phone: values.phone || undefined,
+        city: values.city || undefined,
+        address: values.address || undefined,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Store created.')
+          setCreateOpen(false)
+          form.reset()
+        },
+        onError: (err: any) => {
+          toast.error(err?.response?.data?.message ?? 'Failed to create store.')
+        },
+      }
+    )
+  }
 
   return (
     <>
@@ -79,6 +152,10 @@ export function Stores() {
           </Select>
         </div>
         <div className='ms-auto flex items-center gap-2'>
+          <Button size='sm' onClick={() => setCreateOpen(true)}>
+            <Plus className='me-1.5 h-3.5 w-3.5' />
+            New Store
+          </Button>
           <ThemeSwitch />
         </div>
       </Header>
@@ -121,7 +198,10 @@ export function Stores() {
                     <TableCell>
                       <div className='flex items-center gap-3'>
                         <Avatar className='h-8 w-8 rounded-lg'>
-                          <AvatarImage src={store.logo ?? undefined} alt={store.name} />
+                          <AvatarImage
+                            src={store.logo ?? undefined}
+                            alt={store.name}
+                          />
                           <AvatarFallback className='rounded-lg text-xs'>
                             {store.name.slice(0, 2).toUpperCase()}
                           </AvatarFallback>
@@ -129,7 +209,9 @@ export function Stores() {
                         <div>
                           <p className='font-medium leading-none'>{store.name}</p>
                           {store.city && (
-                            <p className='mt-0.5 text-xs text-muted-foreground'>{store.city}</p>
+                            <p className='mt-0.5 text-xs text-muted-foreground'>
+                              {store.city}
+                            </p>
                           )}
                         </div>
                         {store.is_open ? (
@@ -141,8 +223,12 @@ export function Stores() {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className='text-sm font-medium'>{store.seller?.name}</p>
-                        <p className='text-xs text-muted-foreground'>{store.seller?.email}</p>
+                        <p className='text-sm font-medium'>
+                          {store.seller?.name}
+                        </p>
+                        <p className='text-xs text-muted-foreground'>
+                          {store.seller?.email}
+                        </p>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -153,8 +239,12 @@ export function Stores() {
                         {store.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className='text-sm'>{store.products_count}</TableCell>
-                    <TableCell className='text-sm'>{store.orders_count}</TableCell>
+                    <TableCell className='text-sm'>
+                      {store.products_count}
+                    </TableCell>
+                    <TableCell className='text-sm'>
+                      {store.orders_count}
+                    </TableCell>
                     <TableCell>
                       {store.rating ? (
                         <span className='flex items-center gap-1 text-sm'>
@@ -169,7 +259,12 @@ export function Stores() {
                       {store.created_at}
                     </TableCell>
                     <TableCell>
-                      <Button variant='ghost' size='sm' className='h-7 gap-1.5 text-xs' asChild>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        className='h-7 gap-1.5 text-xs'
+                        asChild
+                      >
                         <Link
                           to='/stores/$storeId'
                           params={{ storeId: String(store.id) }}
@@ -186,6 +281,139 @@ export function Stores() {
           </div>
         )}
       </Main>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className='max-w-lg'>
+          <DialogHeader>
+            <DialogTitle>Create New Store</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleCreate)}
+              className='space-y-4'
+            >
+              <FormField
+                control={form.control}
+                name='seller_id'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Seller</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select a seller' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {(usersData?.data ?? [])
+                          .filter((u: any) => u.role === 'seller')
+                          .map((user: any) => (
+                            <SelectItem key={user.id} value={String(user.id)}>
+                              {user.name} — {user.email}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='name'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Store Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder='e.g. Ahmed Fashion' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='description'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description (optional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder='Brief store description...'
+                        rows={2}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className='grid grid-cols-2 gap-4'>
+                <FormField
+                  control={form.control}
+                  name='city'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City (optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder='e.g. Amman' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='phone'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone (optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder='+962 7...' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name='address'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address (optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Street address...' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={() => setCreateOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type='submit' disabled={createStore.isPending}>
+                  {createStore.isPending && (
+                    <Loader2 className='me-2 h-4 w-4 animate-spin' />
+                  )}
+                  Create Store
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
