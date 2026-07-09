@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useParams, Link } from '@tanstack/react-router'
-import { useForm } from 'react-hook-form'
+import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
@@ -16,6 +16,9 @@ import {
   CheckCircle2,
   XCircle,
   Plus,
+  Trash2,
+  ImageIcon,
+  X,
 } from 'lucide-react'
 import {
   useAdminStore,
@@ -26,6 +29,7 @@ import {
 } from '@/hooks/api/use-stores'
 import { useAdminCategories } from '@/hooks/api/use-categories-admin'
 import { usePaymentSettings } from '@/hooks/api/use-settings'
+import { useAdminUpload } from '@/hooks/api/use-admin-upload'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ThemeSwitch } from '@/components/theme-switch'
@@ -65,7 +69,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
+
+const variantSchema = z.object({
+  size: z.string().optional(),
+  color: z.string().optional(),
+  color_hex: z.string().optional(),
+  stock: z.number().int().min(0).default(0),
+  price_adjustment: z.number().default(0),
+})
 
 const createProductSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -74,6 +87,8 @@ const createProductSchema = z.object({
   price: z.number({ error: 'Required' }).min(0),
   original_price: z.number().optional(),
   stock: z.number({ error: 'Required' }).int().min(0),
+  images: z.array(z.string()).optional(),
+  variants: z.array(variantSchema).optional(),
 })
 
 type CreateProductForm = z.infer<typeof createProductSchema>
@@ -112,6 +127,8 @@ export function StoreDetail() {
   const { storeId } = useParams({ from: '/_authenticated/stores/$storeId/' })
   const id = Number(storeId)
   const [showCreateProduct, setShowCreateProduct] = useState(false)
+  const [uploadingImg, setUploadingImg] = useState(false)
+  const imgInputRef = useRef<HTMLInputElement>(null)
 
   const { data: storeData, isLoading } = useAdminStore(id)
   const { data: ordersData, isLoading: ordersLoading } = useAdminStoreOrders(id)
@@ -120,6 +137,7 @@ export function StoreDetail() {
   const { data: paymentSettings } = usePaymentSettings()
   const updateStatus = useUpdateStoreStatus()
   const createProduct = useAdminCreateStoreProduct()
+  const upload = useAdminUpload()
 
   const store = storeData?.data
   const orders = ordersData?.data ?? []
@@ -129,8 +147,45 @@ export function StoreDetail() {
 
   const createForm = useForm<CreateProductForm>({
     resolver: zodResolver(createProductSchema),
-    defaultValues: { name: '', description: '', category_id: '', stock: 0 },
+    defaultValues: {
+      name: '',
+      description: '',
+      category_id: '',
+      stock: 0,
+      images: [],
+      variants: [],
+    },
   })
+
+  const { fields: variantFields, append: appendVariant, remove: removeVariant } =
+    useFieldArray({ control: createForm.control, name: 'variants' })
+
+  const watchedImages = createForm.watch('images') ?? []
+
+  const handleImgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingImg(true)
+    upload.mutate(
+      { file, folder: 'banners' },
+      {
+        onSuccess: (data) => {
+          const current = createForm.getValues('images') ?? []
+          createForm.setValue('images', [...current, data.data.url])
+        },
+        onError: () => toast.error('Image upload failed.'),
+        onSettled: () => {
+          setUploadingImg(false)
+          e.target.value = ''
+        },
+      }
+    )
+  }
+
+  const removeImage = (index: number) => {
+    const current = createForm.getValues('images') ?? []
+    createForm.setValue('images', current.filter((_, i) => i !== index))
+  }
 
   const handleStatusChange = (status: string) => {
     updateStatus.mutate(
@@ -398,14 +453,20 @@ export function StoreDetail() {
                       {products.map((product: any) => (
                         <TableRow key={product.id}>
                           <TableCell>
-                            <div className='flex items-center gap-2'>
-                              {product.images?.[0]?.url && (
-                                <img
-                                  src={product.images[0].url}
-                                  alt={product.name}
-                                  className='h-8 w-8 rounded object-cover'
-                                />
-                              )}
+                            <div className='flex items-center gap-3'>
+                              <div className='h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted ring-1 ring-border'>
+                                {product.images?.[0]?.url ? (
+                                  <img
+                                    src={product.images[0].url}
+                                    alt={product.name}
+                                    className='h-full w-full object-cover'
+                                  />
+                                ) : (
+                                  <div className='flex h-full w-full items-center justify-center'>
+                                    <Package className='h-5 w-5 text-muted-foreground/40' />
+                                  </div>
+                                )}
+                              </div>
                               <span className='font-medium'>{product.name}</span>
                             </div>
                           </TableCell>
@@ -547,16 +608,23 @@ export function StoreDetail() {
         </Tabs>
       </Main>
 
-      <Dialog open={showCreateProduct} onOpenChange={setShowCreateProduct}>
-        <DialogContent className='max-w-lg'>
+      <Dialog
+        open={showCreateProduct}
+        onOpenChange={(v) => {
+          setShowCreateProduct(v)
+          if (!v) createForm.reset()
+        }}
+      >
+        <DialogContent className='max-h-[90vh] max-w-2xl overflow-y-auto'>
           <DialogHeader>
             <DialogTitle>Add Product to {store?.name}</DialogTitle>
           </DialogHeader>
           <Form {...createForm}>
             <form
               onSubmit={createForm.handleSubmit(handleCreateProduct)}
-              className='space-y-4'
+              className='space-y-5'
             >
+              {/* Basic info */}
               <FormField
                 control={createForm.control}
                 name='name'
@@ -614,7 +682,8 @@ export function StoreDetail() {
                 )}
               />
 
-              <div className='grid grid-cols-2 gap-4'>
+              {/* Pricing + stock */}
+              <div className='grid grid-cols-2 gap-4 sm:grid-cols-3'>
                 <FormField
                   control={createForm.control}
                   name='price'
@@ -628,7 +697,9 @@ export function StoreDetail() {
                           min='0'
                           placeholder='0.00'
                           {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -641,7 +712,7 @@ export function StoreDetail() {
                   name='original_price'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Original Price (optional)</FormLabel>
+                      <FormLabel>Original Price</FormLabel>
                       <FormControl>
                         <Input
                           type='number'
@@ -651,8 +722,32 @@ export function StoreDetail() {
                           {...field}
                           onChange={(e) =>
                             field.onChange(
-                              e.target.value ? parseFloat(e.target.value) : undefined
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : undefined
                             )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={createForm.control}
+                  name='stock'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Stock</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          min='0'
+                          placeholder='0'
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value))
                           }
                         />
                       </FormControl>
@@ -662,25 +757,223 @@ export function StoreDetail() {
                 />
               </div>
 
-              <FormField
-                control={createForm.control}
-                name='stock'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Stock</FormLabel>
-                    <FormControl>
-                      <Input
-                        type='number'
-                        min='0'
-                        placeholder='0'
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+              <Separator />
+
+              {/* Photos */}
+              <div className='space-y-2'>
+                <p className='text-sm font-medium'>Photos</p>
+                <div className='flex flex-wrap gap-2'>
+                  {watchedImages.map((url, i) => (
+                    <div
+                      key={i}
+                      className='relative h-20 w-20 overflow-hidden rounded-lg border bg-muted'
+                    >
+                      <img
+                        src={url}
+                        alt=''
+                        className='h-full w-full object-cover'
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                      {i === 0 && (
+                        <span className='absolute bottom-0 left-0 right-0 bg-black/50 py-0.5 text-center text-[10px] text-white'>
+                          Primary
+                        </span>
+                      )}
+                      <button
+                        type='button'
+                        onClick={() => removeImage(i)}
+                        className='absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80'
+                      >
+                        <X className='h-3 w-3' />
+                      </button>
+                    </div>
+                  ))}
+
+                  {watchedImages.length < 5 && (
+                    <button
+                      type='button'
+                      onClick={() => imgInputRef.current?.click()}
+                      disabled={uploadingImg}
+                      className='flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary disabled:opacity-50'
+                    >
+                      {uploadingImg ? (
+                        <Loader2 className='h-5 w-5 animate-spin' />
+                      ) : (
+                        <>
+                          <ImageIcon className='h-5 w-5' />
+                          <span className='text-[10px]'>Add photo</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+                <input
+                  ref={imgInputRef}
+                  type='file'
+                  accept='image/*'
+                  className='hidden'
+                  onChange={handleImgUpload}
+                />
+                <p className='text-xs text-muted-foreground'>
+                  First photo is the primary image. Up to 5 photos.
+                </p>
+              </div>
+
+              <Separator />
+
+              {/* Variants */}
+              <div className='space-y-3'>
+                <div className='flex items-center justify-between'>
+                  <p className='text-sm font-medium'>Variants</p>
+                  <Button
+                    type='button'
+                    size='sm'
+                    variant='outline'
+                    className='h-7 text-xs'
+                    onClick={() =>
+                      appendVariant({
+                        size: '',
+                        color: '',
+                        color_hex: '',
+                        stock: 0,
+                        price_adjustment: 0,
+                      })
+                    }
+                  >
+                    <Plus className='me-1 h-3.5 w-3.5' />
+                    Add variant
+                  </Button>
+                </div>
+
+                {variantFields.length === 0 ? (
+                  <p className='text-xs text-muted-foreground'>
+                    No variants. Add a variant to offer different sizes, colors,
+                    etc.
+                  </p>
+                ) : (
+                  <div className='space-y-3'>
+                    {variantFields.map((vf, i) => (
+                      <div
+                        key={vf.id}
+                        className='relative rounded-lg border p-3'
+                      >
+                        <button
+                          type='button'
+                          onClick={() => removeVariant(i)}
+                          className='absolute right-2 top-2 text-muted-foreground hover:text-destructive'
+                        >
+                          <Trash2 className='h-3.5 w-3.5' />
+                        </button>
+                        <div className='grid grid-cols-2 gap-3 sm:grid-cols-3'>
+                          <FormField
+                            control={createForm.control}
+                            name={`variants.${i}.size`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className='text-xs'>Size</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder='S, M, L, XL…'
+                                    className='h-8 text-sm'
+                                    {...field}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={createForm.control}
+                            name={`variants.${i}.color`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className='text-xs'>Color</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder='Red, Blue…'
+                                    className='h-8 text-sm'
+                                    {...field}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={createForm.control}
+                            name={`variants.${i}.color_hex`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className='text-xs'>
+                                  Color Hex
+                                </FormLabel>
+                                <div className='flex items-center gap-1.5'>
+                                  <input
+                                    type='color'
+                                    value={field.value ?? '#000000'}
+                                    onChange={(e) =>
+                                      field.onChange(e.target.value)
+                                    }
+                                    className='h-8 w-8 cursor-pointer rounded border p-0.5'
+                                  />
+                                  <FormControl>
+                                    <Input
+                                      placeholder='#ffffff'
+                                      className='h-8 text-sm'
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={createForm.control}
+                            name={`variants.${i}.stock`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className='text-xs'>Stock</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type='number'
+                                    min='0'
+                                    className='h-8 text-sm'
+                                    {...field}
+                                    onChange={(e) =>
+                                      field.onChange(parseInt(e.target.value))
+                                    }
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={createForm.control}
+                            name={`variants.${i}.price_adjustment`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className='text-xs'>
+                                  Price +/− (JOD)
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type='number'
+                                    step='0.01'
+                                    className='h-8 text-sm'
+                                    {...field}
+                                    onChange={(e) =>
+                                      field.onChange(
+                                        parseFloat(e.target.value) || 0
+                                      )
+                                    }
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
-              />
+              </div>
 
               <DialogFooter>
                 <Button
@@ -690,7 +983,10 @@ export function StoreDetail() {
                 >
                   Cancel
                 </Button>
-                <Button type='submit' disabled={createProduct.isPending}>
+                <Button
+                  type='submit'
+                  disabled={createProduct.isPending || uploadingImg}
+                >
                   {createProduct.isPending && (
                     <Loader2 className='me-2 h-4 w-4 animate-spin' />
                   )}

@@ -1,177 +1,166 @@
+import { useRef, useState } from 'react'
 import { z } from 'zod'
-import { useFieldArray, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from '@tanstack/react-router'
-import { showSubmittedData } from '@/lib/show-submitted-data'
-import { cn } from '@/lib/utils'
+import { Camera, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { useAuthStore } from '@/stores/auth-store'
+import api from '@/lib/axios'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 
-const profileFormSchema = z.object({
-  username: z
-    .string('Please enter your username.')
-    .min(2, 'Username must be at least 2 characters.')
-    .max(30, 'Username must not be longer than 30 characters.'),
-  email: z.email({
-    error: (iss) =>
-      iss.input === undefined
-        ? 'Please select an email to display.'
-        : undefined,
-  }),
-  bio: z.string().max(160).min(4),
-  urls: z
-    .array(
-      z.object({
-        value: z.url('Please enter a valid URL.'),
-      })
-    )
-    .optional(),
+const profileSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters.'),
+  email: z.email('Please enter a valid email.'),
 })
 
-type ProfileFormValues = z.infer<typeof profileFormSchema>
+type ProfileValues = z.infer<typeof profileSchema>
 
-// This can come from your database or API.
-const defaultValues: Partial<ProfileFormValues> = {
-  bio: 'I own a computer.',
-  urls: [
-    { value: 'https://shadcn.com' },
-    { value: 'http://twitter.com/shadcn' },
-  ],
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase()
 }
 
 export function ProfileForm() {
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileFormSchema),
-    defaultValues,
-    mode: 'onChange',
+  const user = useAuthStore((s) => s.user)
+  const fetchMe = useAuthStore((s) => s.fetchMe)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const form = useForm<ProfileValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: user?.name ?? '',
+      email: user?.email ?? '',
+    },
   })
 
-  const { fields, append } = useFieldArray({
-    name: 'urls',
-    control: form.control,
-  })
+  async function onSubmit(data: ProfileValues) {
+    setIsSubmitting(true)
+    try {
+      await api.patch('/auth/profile', data)
+      await fetchMe()
+      toast.success('Profile updated.')
+    } catch {
+      toast.error('Failed to update profile.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setAvatarUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('avatar', file)
+      await api.post('/upload/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      await fetchMe()
+      toast.success('Avatar updated.')
+    } catch {
+      toast.error('Failed to upload avatar.')
+    } finally {
+      setAvatarUploading(false)
+      e.target.value = ''
+    }
+  }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => showSubmittedData(data))}
-        className='space-y-8'
-      >
-        <FormField
-          control={form.control}
-          name='username'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input placeholder='shadcn' {...field} />
-              </FormControl>
-              <FormDescription>
-                This is your public display name. It can be your real name or a
-                pseudonym. You can only change this once every 30 days.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='email'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select a verified email to display' />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value='m@example.com'>m@example.com</SelectItem>
-                  <SelectItem value='m@google.com'>m@google.com</SelectItem>
-                  <SelectItem value='m@support.com'>m@support.com</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                You can manage verified email addresses in your{' '}
-                <Link to='/'>email settings</Link>.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='bio'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bio</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder='Tell us a little bit about yourself'
-                  className='resize-none'
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                You can <span>@mention</span> other users and organizations to
-                link to them.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div>
-          {fields.map((field, index) => (
-            <FormField
-              control={form.control}
-              key={field.id}
-              name={`urls.${index}.value`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={cn(index !== 0 && 'sr-only')}>
-                    URLs
-                  </FormLabel>
-                  <FormDescription className={cn(index !== 0 && 'sr-only')}>
-                    Add links to your website, blog, or social media profiles.
-                  </FormDescription>
-                  <FormControl className={cn(index !== 0 && 'mt-1.5')}>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
-          <Button
+    <div className='space-y-6'>
+      {/* Avatar */}
+      <div className='flex items-center gap-4'>
+        <div className='relative'>
+          <Avatar className='h-16 w-16 rounded-xl'>
+            <AvatarImage src={(user as any)?.avatar ?? undefined} alt={user?.name} />
+            <AvatarFallback className='rounded-xl text-lg'>
+              {getInitials(user?.name ?? 'A')}
+            </AvatarFallback>
+          </Avatar>
+          <button
             type='button'
-            variant='outline'
-            size='sm'
-            className='mt-2'
-            onClick={() => append({ value: '' })}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={avatarUploading}
+            className='absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50'
           >
-            Add URL
-          </Button>
+            {avatarUploading ? (
+              <Loader2 className='h-3 w-3 animate-spin' />
+            ) : (
+              <Camera className='h-3 w-3' />
+            )}
+          </button>
+          <input
+            ref={fileInputRef}
+            type='file'
+            accept='image/*'
+            className='hidden'
+            onChange={handleAvatarChange}
+          />
         </div>
-        <Button type='submit'>Update profile</Button>
-      </form>
-    </Form>
+        <div>
+          <p className='text-sm font-medium'>{user?.name}</p>
+          <p className='text-xs text-muted-foreground'>{user?.role}</p>
+          <button
+            type='button'
+            onClick={() => fileInputRef.current?.click()}
+            disabled={avatarUploading}
+            className='mt-1 text-xs text-primary hover:underline disabled:opacity-50'
+          >
+            {avatarUploading ? 'Uploading…' : 'Change photo'}
+          </button>
+        </div>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+          <FormField
+            control={form.control}
+            name='name'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Full Name</FormLabel>
+                <FormControl>
+                  <Input placeholder='Your name' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='email'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input type='email' placeholder='you@example.com' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type='submit' disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className='me-2 h-4 w-4 animate-spin' />}
+            Save Changes
+          </Button>
+        </form>
+      </Form>
+    </div>
   )
 }

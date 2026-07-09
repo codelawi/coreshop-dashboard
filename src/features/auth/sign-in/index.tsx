@@ -1,11 +1,4 @@
 import { useSearch } from '@tanstack/react-router'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { AuthLayout } from '../auth-layout'
 import { UserAuthForm } from './components/user-auth-form'
 
@@ -14,17 +7,15 @@ export function SignIn() {
 
   return (
     <AuthLayout>
-      <Card className='max-w-sm gap-4'>
-        <CardHeader>
-          <CardTitle className='text-lg tracking-tight'>CoreShop Admin</CardTitle>
-          <CardDescription>
-            Enter your email and password to access the admin dashboard.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <UserAuthForm redirectTo={redirect} />
-        </CardContent>
-      </Card>
+      <div className='space-y-6'>
+        <div className='space-y-1'>
+          <h2 className='text-2xl font-bold tracking-tight'>Welcome back</h2>
+          <p className='text-sm text-muted-foreground'>
+            Sign in to your admin account to continue.
+          </p>
+        </div>
+        <UserAuthForm redirectTo={redirect} />
+      </div>
     </AuthLayout>
   )
 }

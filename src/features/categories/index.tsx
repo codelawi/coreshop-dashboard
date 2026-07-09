@@ -90,7 +90,8 @@ function CategoryCard({
             <ImageIcon className='h-8 w-8 text-muted-foreground/40' />
           </div>
         )}
-        <div className='absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100'>
+        {/* Desktop hover overlay */}
+        <div className='absolute inset-0 hidden items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 sm:flex'>
           <button
             onClick={() => onEdit(category)}
             className='flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-gray-800 hover:bg-white'
@@ -106,16 +107,33 @@ function CategoryCard({
         </div>
       </div>
       <div className='flex items-center justify-between p-3'>
-        <div>
-          <p className='font-medium leading-tight'>{category.name}</p>
-          <p className='text-xs text-muted-foreground'>{category.slug}</p>
+        <div className='min-w-0'>
+          <p className='truncate font-medium leading-tight'>{category.name}</p>
+          <p className='truncate text-xs text-muted-foreground'>
+            {category.slug}
+          </p>
         </div>
         <Badge
           variant={category.is_active ? 'default' : 'secondary'}
-          className='text-xs'
+          className='ms-2 shrink-0 text-xs'
         >
           {category.is_active ? 'Active' : 'Off'}
         </Badge>
+      </div>
+      {/* Mobile action row — always visible on small screens */}
+      <div className='flex items-center justify-end gap-1 border-t px-3 py-1.5 sm:hidden'>
+        <button
+          onClick={() => onEdit(category)}
+          className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground'
+        >
+          <Pencil className='h-3.5 w-3.5' />
+        </button>
+        <button
+          onClick={() => onDelete(category)}
+          className='flex h-7 w-7 items-center justify-center rounded-md text-red-500 hover:bg-red-50 hover:text-red-600'
+        >
+          <Trash2 className='h-3.5 w-3.5' />
+        </button>
       </div>
     </div>
   )
