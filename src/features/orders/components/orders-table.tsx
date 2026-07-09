@@ -64,8 +64,7 @@ export function OrdersTable({ data }: Props) {
     <div className='flex flex-1 flex-col gap-4'>
       <DataTableToolbar
         table={table}
-        searchPlaceholder='Search orders...'
-        searchKey='id'
+        searchPlaceholder='Search by order ID or customer...'
         filters={[
           {
             columnId: 'status',

@@ -1,4 +1,4 @@
-import { GripVertical, Loader2, Plus } from 'lucide-react'
+import { Loader2, Plus } from 'lucide-react'
 import { useBanners } from '@/hooks/api/use-banners'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -48,12 +48,14 @@ function BannersContent() {
                 No banners yet. Click "Add Banner" to create one.
               </div>
             )}
-            {banners.map((banner) => (
+            {banners.map((banner, index) => (
               <div
                 key={banner.id}
                 className='flex items-center gap-4 rounded-lg border bg-card p-3 shadow-sm'
               >
-                <GripVertical className='h-5 w-5 shrink-0 cursor-grab text-muted-foreground' />
+                <span className='flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground'>
+                  {index + 1}
+                </span>
                 <div className='h-16 w-28 shrink-0 overflow-hidden rounded-md border'>
                   <img
                     src={banner.image}

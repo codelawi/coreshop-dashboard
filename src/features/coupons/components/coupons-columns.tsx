@@ -131,7 +131,7 @@ export const couponsColumns: ColumnDef<Coupon>[] = [
       const value = Number(row.getValue('value'))
       return (
         <span className='font-medium'>
-          {type === 'percentage' ? `${value}%` : `$${value.toFixed(2)}`}
+          {type === 'percentage' ? `${value}%` : `JOD ${value.toFixed(2)}`}
         </span>
       )
     },
@@ -142,7 +142,7 @@ export const couponsColumns: ColumnDef<Coupon>[] = [
       <DataTableColumnHeader column={column} title='Min. Order' />
     ),
     cell: ({ row }) => (
-      <span>${Number(row.getValue('min_order_amount')).toFixed(2)}</span>
+      <span>JOD {Number(row.getValue('min_order_amount')).toFixed(2)}</span>
     ),
   },
   {

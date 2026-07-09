@@ -38,6 +38,9 @@ import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_a
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 import { Route as AuthenticatedStoresStoreIdIndexRouteImport } from './routes/_authenticated/stores/$storeId/index'
+import { Route as AuthenticatedReviewsIndexRouteImport } from './routes/_authenticated/reviews/index'
+import { Route as AuthenticatedPayoutsIndexRouteImport } from './routes/_authenticated/payouts/index'
+import { Route as AuthenticatedDriversIndexRouteImport } from './routes/_authenticated/drivers/index'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -199,6 +202,24 @@ const AuthenticatedStoresStoreIdIndexRoute =
     path: '/stores/$storeId/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedReviewsIndexRoute =
+  AuthenticatedReviewsIndexRouteImport.update({
+    id: '/reviews/',
+    path: '/reviews/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPayoutsIndexRoute =
+  AuthenticatedPayoutsIndexRouteImport.update({
+    id: '/payouts/',
+    path: '/payouts/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDriversIndexRoute =
+  AuthenticatedDriversIndexRouteImport.update({
+    id: '/drivers/',
+    path: '/drivers/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -229,6 +250,9 @@ export interface FileRoutesByFullPath {
   '/stores/': typeof AuthenticatedStoresIndexRoute
   '/users/': typeof AuthenticatedUsersIndexRoute
   '/stores/$storeId/': typeof AuthenticatedStoresStoreIdIndexRoute
+  '/reviews/': typeof AuthenticatedReviewsIndexRoute
+  '/payouts/': typeof AuthenticatedPayoutsIndexRoute
+  '/drivers/': typeof AuthenticatedDriversIndexRoute
 }
 export interface FileRoutesByTo {
   '/forgot-password': typeof authForgotPasswordRoute
@@ -258,6 +282,9 @@ export interface FileRoutesByTo {
   '/stores': typeof AuthenticatedStoresIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
   '/stores/$storeId': typeof AuthenticatedStoresStoreIdIndexRoute
+  '/reviews': typeof AuthenticatedReviewsIndexRoute
+  '/payouts': typeof AuthenticatedPayoutsIndexRoute
+  '/drivers': typeof AuthenticatedDriversIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -290,6 +317,9 @@ export interface FileRoutesById {
   '/_authenticated/stores/': typeof AuthenticatedStoresIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
   '/_authenticated/stores/$storeId/': typeof AuthenticatedStoresStoreIdIndexRoute
+  '/_authenticated/reviews/': typeof AuthenticatedReviewsIndexRoute
+  '/_authenticated/payouts/': typeof AuthenticatedPayoutsIndexRoute
+  '/_authenticated/drivers/': typeof AuthenticatedDriversIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -322,6 +352,9 @@ export interface FileRouteTypes {
     | '/stores/'
     | '/users/'
     | '/stores/$storeId/'
+    | '/reviews/'
+    | '/payouts/'
+    | '/drivers/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/forgot-password'
@@ -351,6 +384,9 @@ export interface FileRouteTypes {
     | '/stores'
     | '/users'
     | '/stores/$storeId'
+    | '/reviews'
+    | '/payouts'
+    | '/drivers'
   id:
     | '__root__'
     | '/_authenticated'
@@ -382,6 +418,9 @@ export interface FileRouteTypes {
     | '/_authenticated/stores/'
     | '/_authenticated/users/'
     | '/_authenticated/stores/$storeId/'
+    | '/_authenticated/reviews/'
+    | '/_authenticated/payouts/'
+    | '/_authenticated/drivers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -603,6 +642,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStoresStoreIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reviews/': {
+      id: '/_authenticated/reviews/'
+      path: '/reviews'
+      fullPath: '/reviews/'
+      preLoaderRoute: typeof AuthenticatedReviewsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/payouts/': {
+      id: '/_authenticated/payouts/'
+      path: '/payouts'
+      fullPath: '/payouts/'
+      preLoaderRoute: typeof AuthenticatedPayoutsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/drivers/': {
+      id: '/_authenticated/drivers/'
+      path: '/drivers'
+      fullPath: '/drivers/'
+      preLoaderRoute: typeof AuthenticatedDriversIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -643,6 +703,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedStoresIndexRoute: typeof AuthenticatedStoresIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
   AuthenticatedStoresStoreIdIndexRoute: typeof AuthenticatedStoresStoreIdIndexRoute
+  AuthenticatedReviewsIndexRoute: typeof AuthenticatedReviewsIndexRoute
+  AuthenticatedPayoutsIndexRoute: typeof AuthenticatedPayoutsIndexRoute
+  AuthenticatedDriversIndexRoute: typeof AuthenticatedDriversIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -659,6 +722,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedStoresIndexRoute: AuthenticatedStoresIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
   AuthenticatedStoresStoreIdIndexRoute: AuthenticatedStoresStoreIdIndexRoute,
+  AuthenticatedReviewsIndexRoute: AuthenticatedReviewsIndexRoute,
+  AuthenticatedPayoutsIndexRoute: AuthenticatedPayoutsIndexRoute,
+  AuthenticatedDriversIndexRoute: AuthenticatedDriversIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

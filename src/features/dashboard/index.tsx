@@ -7,6 +7,7 @@ import {
   Clock,
   Loader2,
 } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { useAnalyticsOverview } from '@/hooks/api/use-analytics'
 import {
   Card,
@@ -15,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { Search } from '@/components/search'
@@ -24,10 +26,7 @@ import { RecentSales } from './components/recent-sales'
 
 function formatCurrency(value: number | null | undefined) {
   const n = Number(value ?? 0)
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(n)
+  return `JOD ${n.toFixed(2)}`
 }
 
 function formatNumber(value: number | null | undefined) {
@@ -126,11 +125,16 @@ export function Dashboard() {
               </CardContent>
             </Card>
             <Card className='col-span-1 lg:col-span-3'>
-              <CardHeader>
-                <CardTitle>Recent Orders</CardTitle>
-                <CardDescription>
-                  Latest 5 orders across the platform
-                </CardDescription>
+              <CardHeader className='flex flex-row items-start justify-between'>
+                <div>
+                  <CardTitle>Recent Orders</CardTitle>
+                  <CardDescription>
+                    Latest 5 orders across the platform
+                  </CardDescription>
+                </div>
+                <Button variant='ghost' size='sm' asChild className='-mt-1'>
+                  <Link to='/orders'>View all</Link>
+                </Button>
               </CardHeader>
               <CardContent>
                 <RecentSales />

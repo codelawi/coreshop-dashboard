@@ -186,6 +186,20 @@ export const ordersColumns: ColumnDef<Order>[] = [
     filterFn: (row, id, value) => value.includes(row.getValue(id)),
   },
   {
+    accessorKey: 'store',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Store' />
+    ),
+    cell: ({ row }) => {
+      const store = row.original.store
+      return (
+        <span className='text-sm text-muted-foreground'>
+          {store?.name ?? '—'}
+        </span>
+      )
+    },
+  },
+  {
     accessorKey: 'items_count',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Items' />

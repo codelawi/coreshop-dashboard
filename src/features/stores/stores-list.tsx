@@ -185,6 +185,7 @@ export function Stores() {
                   <TableHead>Store</TableHead>
                   <TableHead>Seller</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Revenue</TableHead>
                   <TableHead>Products</TableHead>
                   <TableHead>Orders</TableHead>
                   <TableHead>Rating</TableHead>
@@ -238,6 +239,11 @@ export function Stores() {
                       >
                         {store.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell className='text-sm font-medium'>
+                      {store.total_revenue != null
+                        ? `JOD ${Number(store.total_revenue).toFixed(2)}`
+                        : '—'}
                     </TableCell>
                     <TableCell className='text-sm'>
                       {store.products_count}

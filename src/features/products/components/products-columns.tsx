@@ -1,6 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
-import { CheckCircle, Eye, Loader2, Trash2 } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Eye, Loader2, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useUpdateProductStatus } from '@/hooks/api/use-products'
 import {
@@ -110,6 +110,32 @@ function ProductRowActions({ product }: { product: Product }) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Approve</TooltipContent>
+            </Tooltip>
+          )}
+
+          {status !== 'flagged' && status !== 'removed' && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size='icon'
+                  variant='ghost'
+                  className='h-8 w-8 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700'
+                  onClick={() =>
+                    updateStatus.mutate(
+                      { id: product.id, status: 'flagged' },
+                      {
+                        onSuccess: () =>
+                          toast.success(`Product "${product.name}" flagged.`),
+                        onError: () =>
+                          toast.error('Failed to flag product.'),
+                      }
+                    )
+                  }
+                >
+                  <AlertTriangle className='h-4 w-4' />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Flag</TooltipContent>
             </Tooltip>
           )}
 

@@ -22,6 +22,13 @@ export const orderSchema = z.object({
     name: z.string(),
     email: z.string(),
   }),
+  store: z
+    .object({
+      id: z.number(),
+      name: z.string(),
+    })
+    .nullable()
+    .optional(),
   coupon: z
     .object({
       id: z.number(),

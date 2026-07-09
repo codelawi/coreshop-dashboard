@@ -60,7 +60,7 @@ export function TopSellersTable() {
                     {seller.orders} orders
                   </span>
                   <span className='font-medium'>
-                    ${seller.revenue.toLocaleString()}
+                    JOD {Number(seller.revenue).toFixed(2)}
                   </span>
                 </div>
               </div>

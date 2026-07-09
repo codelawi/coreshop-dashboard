@@ -67,9 +67,9 @@ export function Overview() {
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => `$${value}`}
+          tickFormatter={(value) => `JOD ${value}`}
         />
-        <Tooltip formatter={(value) => [`$${value}`, 'Revenue']} />
+        <Tooltip formatter={(value) => [`JOD ${Number(value).toFixed(2)}`, 'Revenue']} />
         <Bar
           dataKey='revenue'
           fill='currentColor'

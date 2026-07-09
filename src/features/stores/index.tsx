@@ -105,10 +105,7 @@ const PRODUCT_STATUS_COLORS: Record<string, string> = {
 }
 
 function formatCurrency(v: number | string) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(Number(v ?? 0))
+  return `JOD ${Number(v ?? 0).toFixed(2)}`
 }
 
 export function StoreDetail() {
@@ -184,7 +181,7 @@ export function StoreDetail() {
       <Header>
         <div className='flex items-center gap-3'>
           <Button variant='ghost' size='icon' asChild>
-            <Link to='/users'>
+            <Link to='/stores'>
               <ArrowLeft className='h-4 w-4' />
             </Link>
           </Button>

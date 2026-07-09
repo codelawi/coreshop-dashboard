@@ -35,10 +35,7 @@ function getInitials(name: string) {
 }
 
 function formatCurrency(value: number | string) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(Number(value))
+  return `JOD ${Number(value).toFixed(2)}`
 }
 
 export function RecentSales() {
