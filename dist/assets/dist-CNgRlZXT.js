@@ -1,1 +1,0 @@
-import{g as e,p as t}from"./button-B3gov1uE.js";import{r as n}from"./dist-Bt23KBAw.js";var r=e(t(),1);function i(e){let t=r.useRef(e);return r.useEffect(()=>{t.current=e}),r.useMemo(()=>(...e)=>t.current?.(...e),[])}var a=r.useId||(()=>void 0),o=0;function s(e){let[t,i]=r.useState(a());return n(()=>{e||i(e=>e??String(o++))},[e]),e||(t?`radix-${t}`:``)}export{i as n,s as t};
