@@ -76,8 +76,8 @@ const variantSchema = z.object({
   size: z.string().optional(),
   color: z.string().optional(),
   color_hex: z.string().optional(),
-  stock: z.number().int().min(0).default(0),
-  price_adjustment: z.number().default(0),
+  stock: z.number().int().min(0),
+  price_adjustment: z.number(),
 })
 
 const createProductSchema = z.object({
