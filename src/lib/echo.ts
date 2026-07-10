@@ -14,7 +14,7 @@ const echo = new Echo({
   key: import.meta.env.VITE_PUSHER_APP_KEY,
   cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
   forceTLS: true,
-  authEndpoint: `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') ?? 'http://localhost:8000'}/broadcasting/auth`,
+  authEndpoint: `${import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/v1'}/broadcasting/auth`,
   auth: {
     headers: {
       Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
