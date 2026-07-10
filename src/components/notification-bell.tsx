@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { Bell, Check, CheckCheck, Package, ShoppingBag, UserPlus } from 'lucide-react'
+import { Bell, CheckCheck, Package, ShoppingBag, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import echo from '@/lib/echo'

@@ -95,7 +95,7 @@ export function UsersGrowthChart() {
               <Line
                 type='monotone'
                 dataKey='clients'
-                stroke='hsl(var(--primary))'
+                stroke='hsl(217, 91%, 60%)'
                 strokeWidth={2}
                 dot={false}
               />
