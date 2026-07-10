@@ -15,8 +15,10 @@ const echo = new Echo({
   key: import.meta.env.VITE_PUSHER_APP_KEY,
   cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
   forceTLS: true,
-  authorizer: (channel: { name: string }) => ({
-    authorize: (socketId: string, callback: (error: Error | null, data: unknown) => void) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  authorizer: (channel: any) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    authorize: (socketId: string, callback: (error: any, data: any) => void) => {
       api
         .post('/broadcasting/auth', {
           socket_id: socketId,
