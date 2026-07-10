@@ -2,6 +2,7 @@ import { useUsers } from './users-provider'
 import { UsersActionDialog } from './users-action-dialog'
 import { UsersBanDialog } from './users-ban-dialog'
 import { UsersDeleteDialog } from './users-delete-dialog'
+import { UserProfileSheet } from './user-profile-sheet'
 
 export function UsersDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = useUsers()
@@ -15,6 +16,13 @@ export function UsersDialogs() {
     <>
       {currentRow && (
         <>
+          <UserProfileSheet
+            key={`user-profile-${currentRow.id}`}
+            userId={currentRow.id}
+            open={open === 'profile'}
+            onOpenChange={closeWithDelay('profile')}
+          />
+
           <UsersActionDialog
             key={`user-edit-${currentRow.id}`}
             open={open === 'edit'}

@@ -31,6 +31,7 @@ import { Route as AuthenticatedPayoutsIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedPaymentIndexRouteImport } from './routes/_authenticated/payment/index'
 import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders/index'
 import { Route as AuthenticatedDriversIndexRouteImport } from './routes/_authenticated/drivers/index'
+import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications/index'
 import { Route as AuthenticatedCouponsIndexRouteImport } from './routes/_authenticated/coupons/index'
 import { Route as AuthenticatedCategoriesIndexRouteImport } from './routes/_authenticated/categories/index'
 import { Route as AuthenticatedBannersIndexRouteImport } from './routes/_authenticated/banners/index'
@@ -160,6 +161,12 @@ const AuthenticatedDriversIndexRoute =
     path: '/drivers/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedNotificationsIndexRoute =
+  AuthenticatedNotificationsIndexRouteImport.update({
+    id: '/notifications/',
+    path: '/notifications/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCouponsIndexRoute =
   AuthenticatedCouponsIndexRouteImport.update({
     id: '/coupons/',
@@ -244,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/categories/': typeof AuthenticatedCategoriesIndexRoute
   '/coupons/': typeof AuthenticatedCouponsIndexRoute
   '/drivers/': typeof AuthenticatedDriversIndexRoute
+  '/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/orders/': typeof AuthenticatedOrdersIndexRoute
   '/payment/': typeof AuthenticatedPaymentIndexRoute
   '/payouts/': typeof AuthenticatedPayoutsIndexRoute
@@ -276,6 +284,7 @@ export interface FileRoutesByTo {
   '/categories': typeof AuthenticatedCategoriesIndexRoute
   '/coupons': typeof AuthenticatedCouponsIndexRoute
   '/drivers': typeof AuthenticatedDriversIndexRoute
+  '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
   '/payment': typeof AuthenticatedPaymentIndexRoute
   '/payouts': typeof AuthenticatedPayoutsIndexRoute
@@ -311,6 +320,7 @@ export interface FileRoutesById {
   '/_authenticated/categories/': typeof AuthenticatedCategoriesIndexRoute
   '/_authenticated/coupons/': typeof AuthenticatedCouponsIndexRoute
   '/_authenticated/drivers/': typeof AuthenticatedDriversIndexRoute
+  '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
   '/_authenticated/payment/': typeof AuthenticatedPaymentIndexRoute
   '/_authenticated/payouts/': typeof AuthenticatedPayoutsIndexRoute
@@ -346,6 +356,7 @@ export interface FileRouteTypes {
     | '/categories/'
     | '/coupons/'
     | '/drivers/'
+    | '/notifications/'
     | '/orders/'
     | '/payment/'
     | '/payouts/'
@@ -378,6 +389,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/coupons'
     | '/drivers'
+    | '/notifications'
     | '/orders'
     | '/payment'
     | '/payouts'
@@ -412,6 +424,7 @@ export interface FileRouteTypes {
     | '/_authenticated/categories/'
     | '/_authenticated/coupons/'
     | '/_authenticated/drivers/'
+    | '/_authenticated/notifications/'
     | '/_authenticated/orders/'
     | '/_authenticated/payment/'
     | '/_authenticated/payouts/'
@@ -593,6 +606,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDriversIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notifications/': {
+      id: '/_authenticated/notifications/'
+      path: '/notifications'
+      fullPath: '/notifications/'
+      preLoaderRoute: typeof AuthenticatedNotificationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/coupons/': {
       id: '/_authenticated/coupons/'
       path: '/coupons'
@@ -698,6 +718,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCategoriesIndexRoute: typeof AuthenticatedCategoriesIndexRoute
   AuthenticatedCouponsIndexRoute: typeof AuthenticatedCouponsIndexRoute
   AuthenticatedDriversIndexRoute: typeof AuthenticatedDriversIndexRoute
+  AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedOrdersIndexRoute: typeof AuthenticatedOrdersIndexRoute
   AuthenticatedPaymentIndexRoute: typeof AuthenticatedPaymentIndexRoute
   AuthenticatedPayoutsIndexRoute: typeof AuthenticatedPayoutsIndexRoute
@@ -717,6 +738,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCategoriesIndexRoute: AuthenticatedCategoriesIndexRoute,
   AuthenticatedCouponsIndexRoute: AuthenticatedCouponsIndexRoute,
   AuthenticatedDriversIndexRoute: AuthenticatedDriversIndexRoute,
+  AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedOrdersIndexRoute: AuthenticatedOrdersIndexRoute,
   AuthenticatedPaymentIndexRoute: AuthenticatedPaymentIndexRoute,
   AuthenticatedPayoutsIndexRoute: AuthenticatedPayoutsIndexRoute,

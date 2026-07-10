@@ -6,6 +6,7 @@ import {
   Store,
   Tag,
   BarChart3,
+  Bell,
   Image,
   Layers,
   CreditCard,
@@ -87,6 +88,11 @@ export const sidebarData: SidebarData = {
     {
       title: 'Platform',
       items: [
+        {
+          title: 'Notifications',
+          url: '/notifications',
+          icon: Bell,
+        },
         {
           title: 'Reviews',
           url: '/reviews',

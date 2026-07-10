@@ -1,8 +1,10 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { AlertTriangle, CheckCircle, Eye, Loader2, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useUpdateProductStatus } from '@/hooks/api/use-products'
+import { UserProfileSheet } from '@/features/users/components/user-profile-sheet'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +41,19 @@ const statusLabel: Record<ProductStatus, string> = {
   pending_review: 'Pending Review',
   flagged: 'Flagged',
   removed: 'Removed',
+}
+
+function SellerCell({ id, name, email }: { id: number; name: string; email: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <button onClick={() => setOpen(true)} className='text-left hover:underline'>
+        <p className='text-sm font-medium'>{name}</p>
+        <p className='text-xs text-muted-foreground'>{email}</p>
+      </button>
+      <UserProfileSheet userId={id} open={open} onOpenChange={setOpen} />
+    </>
+  )
 }
 
 function ProductRowActions({ product }: { product: Product }) {
@@ -220,11 +235,25 @@ export const productsColumns: ColumnDef<Product>[] = [
     ),
     cell: ({ row }) => {
       const seller = row.getValue('seller') as Product['seller']
+      return <SellerCell id={seller.id} name={seller.name} email={seller.email} />
+    },
+  },
+  {
+    id: 'store',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Store' />
+    ),
+    cell: ({ row }) => {
+      const store = row.original.store
+      if (!store) return <span className='text-sm text-muted-foreground'>—</span>
       return (
-        <div>
-          <p className='text-sm font-medium'>{seller.name}</p>
-          <p className='text-xs text-muted-foreground'>{seller.email}</p>
-        </div>
+        <Link
+          to='/stores/$storeId'
+          params={{ storeId: String(store.id) }}
+          className='text-sm font-medium hover:underline'
+        >
+          {store.name}
+        </Link>
       )
     },
   },
@@ -272,11 +301,16 @@ export const productsColumns: ColumnDef<Product>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Date' />
     ),
-    cell: ({ row }) => (
-      <span className='text-sm text-muted-foreground'>
-        {row.getValue('created_at')}
-      </span>
-    ),
+    cell: ({ row }) => {
+      const val = row.getValue('created_at') as string
+      const [date, time] = val.split(' ')
+      return (
+        <div className='text-sm'>
+          <p>{date}</p>
+          {time && <p className='text-xs text-muted-foreground'>{time}</p>}
+        </div>
+      )
+    },
   },
   {
     id: 'actions',

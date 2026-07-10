@@ -1,5 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { Eye, Loader2, MoreHorizontal } from 'lucide-react'
 import { toast } from 'sonner'
 import { useUpdateOrderStatus } from '@/hooks/api/use-orders'
@@ -22,6 +23,7 @@ import {
 import { DataTableColumnHeader } from '@/components/data-table/column-header'
 import type { Order, OrderStatus } from '../data/schema'
 import { OrderDetailSheet } from './order-detail-sheet'
+import { UserProfileSheet } from '@/features/users/components/user-profile-sheet'
 
 type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive'
 
@@ -63,6 +65,19 @@ const allStatuses: OrderStatus[] = [
   'cancelled',
   'refunded',
 ]
+
+function UserCell({ id, name, email }: { id: number; name: string; email: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <button onClick={() => setOpen(true)} className='text-left hover:underline'>
+        <p className='text-sm font-medium'>{name}</p>
+        <p className='text-xs text-muted-foreground'>{email}</p>
+      </button>
+      <UserProfileSheet userId={id} open={open} onOpenChange={setOpen} />
+    </>
+  )
+}
 
 function OrderRowActions({ order }: { order: Order }) {
   const updateStatus = useUpdateOrderStatus()
@@ -162,12 +177,7 @@ export const ordersColumns: ColumnDef<Order>[] = [
     ),
     cell: ({ row }) => {
       const client = row.getValue('client') as Order['client']
-      return (
-        <div>
-          <p className='text-sm font-medium'>{client.name}</p>
-          <p className='text-xs text-muted-foreground'>{client.email}</p>
-        </div>
-      )
+      return <UserCell id={client.id} name={client.name} email={client.email} />
     },
   },
   {
@@ -192,11 +202,27 @@ export const ordersColumns: ColumnDef<Order>[] = [
     ),
     cell: ({ row }) => {
       const store = row.original.store
+      if (!store) return <span className='text-sm text-muted-foreground'>—</span>
       return (
-        <span className='text-sm text-muted-foreground'>
-          {store?.name ?? '—'}
-        </span>
+        <Link
+          to='/stores/$storeId'
+          params={{ storeId: String(store.id) }}
+          className='text-sm font-medium hover:underline'
+        >
+          {store.name}
+        </Link>
       )
+    },
+  },
+  {
+    id: 'seller',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Seller' />
+    ),
+    cell: ({ row }) => {
+      const seller = row.original.seller
+      if (!seller) return <span className='text-sm text-muted-foreground'>—</span>
+      return <UserCell id={seller.id} name={seller.name} email={seller.email} />
     },
   },
   {
@@ -234,11 +260,16 @@ export const ordersColumns: ColumnDef<Order>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Date' />
     ),
-    cell: ({ row }) => (
-      <span className='text-sm text-muted-foreground'>
-        {row.getValue('created_at')}
-      </span>
-    ),
+    cell: ({ row }) => {
+      const val = row.getValue('created_at') as string
+      const [date, time] = val.split(' ')
+      return (
+        <div className='text-sm'>
+          <p>{date}</p>
+          {time && <p className='text-xs text-muted-foreground'>{time}</p>}
+        </div>
+      )
+    },
   },
   {
     id: 'actions',

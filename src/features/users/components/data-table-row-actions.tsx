@@ -1,6 +1,6 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import type { Row } from '@tanstack/react-table'
-import { Ban, Pencil, Trash2 } from 'lucide-react'
+import { Ban, Eye, Pencil, ShieldOff, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -19,8 +19,9 @@ type DataTableRowActionsProps = {
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
   const user = row.original
   const { setOpen, setCurrentRow } = useUsers()
+  const isBanned = user.status === 'suspended'
 
-  const handleAction = (action: 'edit' | 'ban' | 'delete') => {
+  const handleAction = (action: 'edit' | 'ban' | 'delete' | 'profile') => {
     setCurrentRow(user)
     setOpen(action)
   }
@@ -36,14 +37,27 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           <span className='sr-only'>Open menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end' className='w-44'>
+      <DropdownMenuContent align='end' className='w-48'>
+        <DropdownMenuItem onClick={() => handleAction('profile')}>
+          <Eye className='mr-2 h-4 w-4' />
+          View Profile
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleAction('edit')}>
           <Pencil className='mr-2 h-4 w-4' />
           Edit Account
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleAction('ban')}>
-          <Ban className='mr-2 h-4 w-4' />
-          Ban Account
+          {isBanned ? (
+            <>
+              <ShieldOff className='mr-2 h-4 w-4 text-green-600' />
+              Unban Account
+            </>
+          ) : (
+            <>
+              <Ban className='mr-2 h-4 w-4' />
+              Ban Account
+            </>
+          )}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

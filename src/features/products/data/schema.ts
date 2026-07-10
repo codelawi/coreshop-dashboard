@@ -27,6 +27,13 @@ export const productSchema = z.object({
     name: z.string(),
     email: z.string(),
   }),
+  store: z
+    .object({
+      id: z.number(),
+      name: z.string(),
+    })
+    .nullable()
+    .optional(),
   created_at: z.string(),
 })
 

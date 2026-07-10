@@ -29,6 +29,14 @@ export const orderSchema = z.object({
     })
     .nullable()
     .optional(),
+  seller: z
+    .object({
+      id: z.number(),
+      name: z.string(),
+      email: z.string(),
+    })
+    .nullable()
+    .optional(),
   coupon: z
     .object({
       id: z.number(),

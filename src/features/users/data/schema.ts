@@ -20,9 +20,11 @@ const _userSchema = z.object({
   name: z.string(),
   email: z.string(),
   phone: z.string().nullable(),
+  city: z.string().nullable().optional(),
   avatar: z.string().nullable().optional(),
   status: userStatusSchema,
   role: userRoleSchema,
+  email_verified_at: z.string().nullable().optional(),
   store: z
     .object({
       id: z.number(),
