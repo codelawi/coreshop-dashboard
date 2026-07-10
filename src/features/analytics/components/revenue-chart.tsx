@@ -98,9 +98,9 @@ export function RevenueChart() {
                 tickLine={false}
                 axisLine={false}
                 stroke='hsl(var(--muted-foreground))'
-                tickFormatter={(v) => `$${v}`}
+                tickFormatter={(v) => `JOD ${v}`}
               />
-              <Tooltip formatter={(v) => [`$${v}`, 'Revenue']} />
+              <Tooltip formatter={(v) => [`JOD ${v}`, 'Revenue']} />
               <Area
                 type='monotone'
                 dataKey='revenue'

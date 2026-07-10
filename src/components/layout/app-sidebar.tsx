@@ -1,4 +1,5 @@
 import { useLayout } from '@/context/layout-provider'
+import { useAuthStore } from '@/stores/auth-store'
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +14,14 @@ import { NavUser } from './nav-user'
 
 export function AppSidebar() {
   const { collapsible, variant } = useLayout()
+  const authUser = useAuthStore((s) => s.user)
+
+  const navUser = {
+    name: authUser?.name ?? sidebarData.user.name,
+    email: authUser?.email ?? sidebarData.user.email,
+    avatar: authUser?.avatar ?? sidebarData.user.avatar,
+  }
+
   return (
     <Sidebar collapsible={collapsible} variant={variant}>
       <SidebarHeader>
@@ -24,7 +33,7 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={sidebarData.user} />
+        <NavUser user={navUser} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

@@ -69,9 +69,11 @@ export function ProfileForm() {
     try {
       const formData = new FormData()
       formData.append('avatar', file)
-      await api.post('/upload/avatar', formData, {
+      const res = await api.post('/upload/avatar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
+      const url: string = res.data.data.url
+      await api.patch('/auth/profile', { avatar: url })
       await fetchMe()
       toast.success('Avatar updated.')
     } catch {

@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Loader2, TrendingUp, Store, BadgeDollarSign, Clock } from 'lucide-react'
+import { Loader2, TrendingUp, Store, BadgeDollarSign, Clock, CircleDollarSign } from 'lucide-react'
 import { useAdminStores } from '@/hooks/api/use-stores'
+import { usePaymentSettings } from '@/hooks/api/use-settings'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ThemeSwitch } from '@/components/theme-switch'
@@ -29,8 +30,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
-const PLATFORM_FEE_RATE = 0.1
-
 function fmt(v: number) {
   return `JOD ${v.toFixed(2)}`
 }
@@ -40,6 +39,8 @@ export function Payouts() {
   const [statusFilter, setStatusFilter] = useState('all')
 
   const { data, isLoading } = useAdminStores({ per_page: 100 })
+  const { data: settings } = usePaymentSettings()
+  const PLATFORM_FEE_RATE = (settings?.platform_fee_percentage ?? 10) / 100
   const allStores: any[] = data?.data ?? []
 
   const stores = allStores
@@ -74,7 +75,7 @@ export function Payouts() {
         </div>
 
         {/* Summary cards */}
-        <div className='mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3'>
+        <div className='mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
           <Card>
             <CardHeader className='flex flex-row items-center justify-between pb-2'>
               <CardTitle className='text-sm font-medium text-muted-foreground'>
@@ -89,16 +90,16 @@ export function Payouts() {
               </p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className='border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950'>
             <CardHeader className='flex flex-row items-center justify-between pb-2'>
-              <CardTitle className='text-sm font-medium text-muted-foreground'>
-                Platform Fees (10%)
+              <CardTitle className='text-sm font-medium text-green-700 dark:text-green-400'>
+                Platform Fees ({settings?.platform_fee_percentage ?? 10}%)
               </CardTitle>
-              <BadgeDollarSign className='h-4 w-4 text-muted-foreground' />
+              <BadgeDollarSign className='h-4 w-4 text-green-600 dark:text-green-400' />
             </CardHeader>
             <CardContent>
-              <p className='text-2xl font-bold'>{fmt(totalFees)}</p>
-              <p className='mt-1 text-xs text-muted-foreground'>
+              <p className='text-2xl font-bold text-green-700 dark:text-green-300'>{fmt(totalFees)}</p>
+              <p className='mt-1 text-xs text-green-600 dark:text-green-500'>
                 Commission retained by platform
               </p>
             </CardContent>
@@ -114,6 +115,20 @@ export function Payouts() {
               <p className='text-2xl font-bold'>{fmt(totalPayouts)}</p>
               <p className='mt-1 text-xs text-muted-foreground'>
                 Amount owed to sellers
+              </p>
+            </CardContent>
+          </Card>
+          <Card className='border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950'>
+            <CardHeader className='flex flex-row items-center justify-between pb-2'>
+              <CardTitle className='text-sm font-medium text-emerald-700 dark:text-emerald-400'>
+                Total Profit
+              </CardTitle>
+              <CircleDollarSign className='h-4 w-4 text-emerald-600 dark:text-emerald-400' />
+            </CardHeader>
+            <CardContent>
+              <p className='text-2xl font-bold text-emerald-700 dark:text-emerald-300'>{fmt(totalFees)}</p>
+              <p className='mt-1 text-xs text-emerald-600 dark:text-emerald-500'>
+                Net platform earnings
               </p>
             </CardContent>
           </Card>
@@ -158,7 +173,7 @@ export function Payouts() {
                   <TableHead>Seller</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className='text-right'>Total Revenue</TableHead>
-                  <TableHead className='text-right'>Platform Fee (10%)</TableHead>
+                  <TableHead className='text-right'>Platform Fee ({settings?.platform_fee_percentage ?? 10}%)</TableHead>
                   <TableHead className='text-right'>Seller Payout</TableHead>
                 </TableRow>
               </TableHeader>
