@@ -2,7 +2,7 @@ import { useEffect, useCallback } from 'react'
 import { Bell, Check, CheckCheck, Package, ShoppingBag, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
-import echo, { refreshEchoAuth } from '@/lib/echo'
+import echo from '@/lib/echo'
 import {
   type DashboardNotification,
   useDashboardNotifications,
@@ -59,7 +59,6 @@ export function NotificationBell() {
   )
 
   useEffect(() => {
-    refreshEchoAuth()
     const channel = echo.private('admin-notifications').listen(
       '.AdminNotificationCreated',
       handleIncoming

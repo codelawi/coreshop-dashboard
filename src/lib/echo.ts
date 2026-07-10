@@ -1,5 +1,6 @@
 import Echo from 'laravel-echo'
 import Pusher from 'pusher-js'
+import api from '@/lib/axios'
 
 declare global {
   interface Window {
@@ -14,21 +15,17 @@ const echo = new Echo({
   key: import.meta.env.VITE_PUSHER_APP_KEY,
   cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
   forceTLS: true,
-  authEndpoint: `${import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/v1'}/broadcasting/auth`,
-  auth: {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
+  authorizer: (channel: { name: string }) => ({
+    authorize: (socketId: string, callback: (error: Error | null, data: unknown) => void) => {
+      api
+        .post('/broadcasting/auth', {
+          socket_id: socketId,
+          channel_name: channel.name,
+        })
+        .then((response) => callback(null, response.data))
+        .catch((error) => callback(error, null))
     },
-  },
+  }),
 })
-
-export function refreshEchoAuth(): void {
-  const token = localStorage.getItem('token') ?? ''
-  // @ts-expect-error private connector property
-  if (echo.connector?.pusher?.config?.auth?.headers) {
-    // @ts-expect-error private connector property
-    echo.connector.pusher.config.auth.headers.Authorization = `Bearer ${token}`
-  }
-}
 
 export default echo
