@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
+import { Textarea } from '@/components/ui/textarea'
 
 function initials(name: string) {
   return name
@@ -160,7 +161,7 @@ export function Chat() {
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault()
       handleSend()
     }
@@ -301,22 +302,33 @@ export function Chat() {
           </ScrollArea>
 
           {/* Input */}
-          <div className='border-t px-6 py-4'>
-            <div className='flex gap-2'>
-              <Input
-                placeholder='Type a message... (Enter to send)'
+          <div className='border-t px-4 py-3'>
+            <div className='flex flex-col gap-2'>
+              <Textarea
+                placeholder='Type a message...'
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 onKeyDown={handleKeyDown}
                 disabled={sendMessage.isPending}
+                rows={3}
+                className='resize-none text-sm'
               />
-              <Button
-                size='icon'
-                onClick={handleSend}
-                disabled={!body.trim() || sendMessage.isPending}
-              >
-                <Send className='h-4 w-4' />
-              </Button>
+              <div className='flex items-center justify-between'>
+                <span className='text-xs text-muted-foreground'>
+                  <kbd className='rounded border px-1 py-0.5 text-[10px] font-mono'>Ctrl</kbd>
+                  {' + '}
+                  <kbd className='rounded border px-1 py-0.5 text-[10px] font-mono'>Enter</kbd>
+                  {' to send'}
+                </span>
+                <Button
+                  size='sm'
+                  onClick={handleSend}
+                  disabled={!body.trim() || sendMessage.isPending}
+                >
+                  <Send className='mr-1.5 h-3.5 w-3.5' />
+                  Send
+                </Button>
+              </div>
             </div>
           </div>
         </div>
