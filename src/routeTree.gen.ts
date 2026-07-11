@@ -25,7 +25,6 @@ import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedStoresIndexRouteImport } from './routes/_authenticated/stores/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
-import { Route as AuthenticatedChatIndexRouteImport } from './routes/_authenticated/chat/index'
 import { Route as AuthenticatedSecurityIndexRouteImport } from './routes/_authenticated/security/index'
 import { Route as AuthenticatedReviewsIndexRouteImport } from './routes/_authenticated/reviews/index'
 import { Route as AuthenticatedProductsIndexRouteImport } from './routes/_authenticated/products/index'
@@ -35,6 +34,7 @@ import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications/index'
 import { Route as AuthenticatedDriversIndexRouteImport } from './routes/_authenticated/drivers/index'
 import { Route as AuthenticatedCouponsIndexRouteImport } from './routes/_authenticated/coupons/index'
+import { Route as AuthenticatedChatIndexRouteImport } from './routes/_authenticated/chat/index'
 import { Route as AuthenticatedCategoriesIndexRouteImport } from './routes/_authenticated/categories/index'
 import { Route as AuthenticatedBannersIndexRouteImport } from './routes/_authenticated/banners/index'
 import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics/index'
@@ -127,11 +127,6 @@ const AuthenticatedSettingsIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
-const AuthenticatedChatIndexRoute = AuthenticatedChatIndexRouteImport.update({
-  id: '/chat/',
-  path: '/chat/',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedSecurityIndexRoute =
   AuthenticatedSecurityIndexRouteImport.update({
     id: '/security/',
@@ -186,6 +181,11 @@ const AuthenticatedCouponsIndexRoute =
     path: '/coupons/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedChatIndexRoute = AuthenticatedChatIndexRouteImport.update({
+  id: '/chat/',
+  path: '/chat/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCategoriesIndexRoute =
   AuthenticatedCategoriesIndexRouteImport.update({
     id: '/categories/',
@@ -262,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/banners/': typeof AuthenticatedBannersIndexRoute
   '/categories/': typeof AuthenticatedCategoriesIndexRoute
+  '/chat/': typeof AuthenticatedChatIndexRoute
   '/coupons/': typeof AuthenticatedCouponsIndexRoute
   '/drivers/': typeof AuthenticatedDriversIndexRoute
   '/notifications/': typeof AuthenticatedNotificationsIndexRoute
@@ -270,7 +271,6 @@ export interface FileRoutesByFullPath {
   '/payouts/': typeof AuthenticatedPayoutsIndexRoute
   '/products/': typeof AuthenticatedProductsIndexRoute
   '/reviews/': typeof AuthenticatedReviewsIndexRoute
-  '/chat/': typeof AuthenticatedChatIndexRoute
   '/security/': typeof AuthenticatedSecurityIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/stores/': typeof AuthenticatedStoresIndexRoute
@@ -297,6 +297,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
   '/banners': typeof AuthenticatedBannersIndexRoute
   '/categories': typeof AuthenticatedCategoriesIndexRoute
+  '/chat': typeof AuthenticatedChatIndexRoute
   '/coupons': typeof AuthenticatedCouponsIndexRoute
   '/drivers': typeof AuthenticatedDriversIndexRoute
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
@@ -305,7 +306,6 @@ export interface FileRoutesByTo {
   '/payouts': typeof AuthenticatedPayoutsIndexRoute
   '/products': typeof AuthenticatedProductsIndexRoute
   '/reviews': typeof AuthenticatedReviewsIndexRoute
-  '/chat': typeof AuthenticatedChatIndexRoute
   '/security': typeof AuthenticatedSecurityIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/stores': typeof AuthenticatedStoresIndexRoute
@@ -335,6 +335,7 @@ export interface FileRoutesById {
   '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/_authenticated/banners/': typeof AuthenticatedBannersIndexRoute
   '/_authenticated/categories/': typeof AuthenticatedCategoriesIndexRoute
+  '/_authenticated/chat/': typeof AuthenticatedChatIndexRoute
   '/_authenticated/coupons/': typeof AuthenticatedCouponsIndexRoute
   '/_authenticated/drivers/': typeof AuthenticatedDriversIndexRoute
   '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
@@ -343,7 +344,6 @@ export interface FileRoutesById {
   '/_authenticated/payouts/': typeof AuthenticatedPayoutsIndexRoute
   '/_authenticated/products/': typeof AuthenticatedProductsIndexRoute
   '/_authenticated/reviews/': typeof AuthenticatedReviewsIndexRoute
-  '/_authenticated/chat/': typeof AuthenticatedChatIndexRoute
   '/_authenticated/security/': typeof AuthenticatedSecurityIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/stores/': typeof AuthenticatedStoresIndexRoute
@@ -373,6 +373,7 @@ export interface FileRouteTypes {
     | '/analytics/'
     | '/banners/'
     | '/categories/'
+    | '/chat/'
     | '/coupons/'
     | '/drivers/'
     | '/notifications/'
@@ -381,7 +382,6 @@ export interface FileRouteTypes {
     | '/payouts/'
     | '/products/'
     | '/reviews/'
-    | '/chat/'
     | '/security/'
     | '/settings/'
     | '/stores/'
@@ -408,6 +408,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/banners'
     | '/categories'
+    | '/chat'
     | '/coupons'
     | '/drivers'
     | '/notifications'
@@ -416,7 +417,6 @@ export interface FileRouteTypes {
     | '/payouts'
     | '/products'
     | '/reviews'
-    | '/chat'
     | '/security'
     | '/settings'
     | '/stores'
@@ -445,6 +445,7 @@ export interface FileRouteTypes {
     | '/_authenticated/analytics/'
     | '/_authenticated/banners/'
     | '/_authenticated/categories/'
+    | '/_authenticated/chat/'
     | '/_authenticated/coupons/'
     | '/_authenticated/drivers/'
     | '/_authenticated/notifications/'
@@ -453,7 +454,6 @@ export interface FileRouteTypes {
     | '/_authenticated/payouts/'
     | '/_authenticated/products/'
     | '/_authenticated/reviews/'
-    | '/_authenticated/chat/'
     | '/_authenticated/security/'
     | '/_authenticated/settings/'
     | '/_authenticated/stores/'
@@ -589,13 +589,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
-    '/_authenticated/chat/': {
-      id: '/_authenticated/chat/'
-      path: '/chat'
-      fullPath: '/chat/'
-      preLoaderRoute: typeof AuthenticatedChatIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/security/': {
       id: '/_authenticated/security/'
       path: '/security'
@@ -657,6 +650,13 @@ declare module '@tanstack/react-router' {
       path: '/coupons'
       fullPath: '/coupons/'
       preLoaderRoute: typeof AuthenticatedCouponsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/chat/': {
+      id: '/_authenticated/chat/'
+      path: '/chat'
+      fullPath: '/chat/'
+      preLoaderRoute: typeof AuthenticatedChatIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/categories/': {
@@ -755,6 +755,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsIndexRoute: typeof AuthenticatedAnalyticsIndexRoute
   AuthenticatedBannersIndexRoute: typeof AuthenticatedBannersIndexRoute
   AuthenticatedCategoriesIndexRoute: typeof AuthenticatedCategoriesIndexRoute
+  AuthenticatedChatIndexRoute: typeof AuthenticatedChatIndexRoute
   AuthenticatedCouponsIndexRoute: typeof AuthenticatedCouponsIndexRoute
   AuthenticatedDriversIndexRoute: typeof AuthenticatedDriversIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
@@ -763,7 +764,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPayoutsIndexRoute: typeof AuthenticatedPayoutsIndexRoute
   AuthenticatedProductsIndexRoute: typeof AuthenticatedProductsIndexRoute
   AuthenticatedReviewsIndexRoute: typeof AuthenticatedReviewsIndexRoute
-  AuthenticatedChatIndexRoute: typeof AuthenticatedChatIndexRoute
   AuthenticatedSecurityIndexRoute: typeof AuthenticatedSecurityIndexRoute
   AuthenticatedStoresIndexRoute: typeof AuthenticatedStoresIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
@@ -777,6 +777,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsIndexRoute: AuthenticatedAnalyticsIndexRoute,
   AuthenticatedBannersIndexRoute: AuthenticatedBannersIndexRoute,
   AuthenticatedCategoriesIndexRoute: AuthenticatedCategoriesIndexRoute,
+  AuthenticatedChatIndexRoute: AuthenticatedChatIndexRoute,
   AuthenticatedCouponsIndexRoute: AuthenticatedCouponsIndexRoute,
   AuthenticatedDriversIndexRoute: AuthenticatedDriversIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
@@ -785,7 +786,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPayoutsIndexRoute: AuthenticatedPayoutsIndexRoute,
   AuthenticatedProductsIndexRoute: AuthenticatedProductsIndexRoute,
   AuthenticatedReviewsIndexRoute: AuthenticatedReviewsIndexRoute,
-  AuthenticatedChatIndexRoute: AuthenticatedChatIndexRoute,
   AuthenticatedSecurityIndexRoute: AuthenticatedSecurityIndexRoute,
   AuthenticatedStoresIndexRoute: AuthenticatedStoresIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,

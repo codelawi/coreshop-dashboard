@@ -127,7 +127,7 @@ export function Chat() {
 
   const { data: conversations = [], isLoading: loadingConvs } = useSupportConversations()
   const { data: usersRes } = useUsers()
-  const allUsers: Array<{ id: number; name: string; role: string }> =
+  const allUsers: Array<{ id: number; name: string; role: string; avatar: string | null }> =
     usersRes?.data ?? []
 
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -177,6 +177,7 @@ export function Chat() {
   }
 
   const nonAdminUsers = allUsers.filter((u) => u.role !== 'admin')
+  const selectedNewUser = nonAdminUsers.find((u) => String(u.id) === newUserId)
 
   return (
     <div className='flex h-[calc(100vh-4rem)] overflow-hidden'>
@@ -196,12 +197,35 @@ export function Chat() {
           <div className='flex gap-2'>
             <Select value={newUserId} onValueChange={setNewUserId}>
               <SelectTrigger className='flex-1 text-xs'>
-                <SelectValue placeholder='Start with user...' />
+                {selectedNewUser ? (
+                  <div className='flex items-center gap-2'>
+                    <Avatar className='h-5 w-5 shrink-0'>
+                      <AvatarImage src={selectedNewUser.avatar ?? undefined} />
+                      <AvatarFallback className='text-[10px]'>
+                        {initials(selectedNewUser.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className='truncate'>{selectedNewUser.name}</span>
+                  </div>
+                ) : (
+                  <SelectValue placeholder='Start with user...' />
+                )}
               </SelectTrigger>
               <SelectContent>
                 {nonAdminUsers.map((u) => (
                   <SelectItem key={u.id} value={String(u.id)}>
-                    {u.name}
+                    <div className='flex items-center gap-2'>
+                      <Avatar className='h-6 w-6 shrink-0'>
+                        <AvatarImage src={u.avatar ?? undefined} />
+                        <AvatarFallback className='text-[10px]'>
+                          {initials(u.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className='flex flex-col'>
+                        <span className='text-sm'>{u.name}</span>
+                        <span className='text-xs capitalize text-muted-foreground'>{u.role}</span>
+                      </div>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
