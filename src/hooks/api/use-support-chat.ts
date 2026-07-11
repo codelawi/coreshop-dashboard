@@ -44,6 +44,7 @@ export function useSupportConversations() {
       const res = await api.get('/admin/support')
       return res.data.data as SupportConversation[]
     },
+    refetchInterval: 5000,
   })
 }
 
@@ -66,6 +67,7 @@ export function useSupportMessages(conversationId: number | null) {
       return res.data.data as SupportMessage[]
     },
     enabled: !!conversationId,
+    refetchInterval: 4000,
   })
 }
 
