@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { format, formatDistanceToNow } from 'date-fns'
 import {
   AlertTriangle,
+  Check,
+  Copy,
+  ExternalLink,
   Globe,
   Loader2,
   Shield,
@@ -103,6 +106,13 @@ export function Security() {
   const [ipFilter, setIpFilter] = useState('')
   const [ipSearch, setIpSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [copiedIp, setCopiedIp] = useState<string | null>(null)
+
+  function copyIp(ip: string) {
+    navigator.clipboard.writeText(ip)
+    setCopiedIp(ip)
+    setTimeout(() => setCopiedIp(null), 1500)
+  }
 
   const { data: stats, isLoading: statsLoading } = useSecurityStats()
   const { data, isLoading } = useSecurityEvents({
@@ -128,9 +138,20 @@ export function Security() {
 
   return (
     <div className='space-y-6 p-6'>
-      <div className='flex items-center gap-2'>
-        <Shield className='h-6 w-6' />
-        <h1 className='text-2xl font-bold'>Security</h1>
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
+          <Shield className='h-6 w-6' />
+          <h1 className='text-2xl font-bold'>Security</h1>
+        </div>
+        <a
+          href='https://hpanel.hostinger.com/websites/coreshop.io/advanced/ip-manager'
+          target='_blank'
+          rel='noopener noreferrer'
+          className='flex items-center gap-2 rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90'
+        >
+          <ExternalLink className='h-4 w-4' />
+          Take Action
+        </a>
       </div>
 
       {/* Stats */}
@@ -293,16 +314,29 @@ export function Security() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <button
-                        onClick={() => {
-                          setIpSearch(event.ip_address)
-                          setIpFilter(event.ip_address)
-                          setPage(1)
-                        }}
-                        className='font-mono text-xs hover:underline'
-                      >
-                        {event.ip_address}
-                      </button>
+                      <div className='flex items-center gap-1'>
+                        <button
+                          onClick={() => {
+                            setIpSearch(event.ip_address)
+                            setIpFilter(event.ip_address)
+                            setPage(1)
+                          }}
+                          className='font-mono text-xs hover:underline'
+                        >
+                          {event.ip_address}
+                        </button>
+                        <button
+                          onClick={() => copyIp(event.ip_address)}
+                          className='text-muted-foreground hover:text-foreground'
+                          title='Copy IP'
+                        >
+                          {copiedIp === event.ip_address ? (
+                            <Check className='h-3 w-3 text-green-500' />
+                          ) : (
+                            <Copy className='h-3 w-3' />
+                          )}
+                        </button>
+                      </div>
                     </TableCell>
                     <TableCell className='text-sm'>
                       {event.country ?? '—'}
