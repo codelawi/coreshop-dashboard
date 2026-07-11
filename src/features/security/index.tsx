@@ -200,9 +200,9 @@ export function Security() {
       {/* Filters */}
       <div className='flex flex-wrap items-center gap-3'>
         <Select
-          value={typeFilter}
+          value={typeFilter || 'all'}
           onValueChange={(v) => {
-            setTypeFilter(v as SecurityEventType | '')
+            setTypeFilter(v === 'all' ? '' : (v as SecurityEventType))
             setPage(1)
           }}
         >
@@ -210,7 +210,7 @@ export function Security() {
             <SelectValue placeholder='All types' />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value=''>All types</SelectItem>
+            <SelectItem value='all'>All types</SelectItem>
             <SelectItem value='failed_login'>Failed Login</SelectItem>
             <SelectItem value='rate_limited'>Rate Limited</SelectItem>
             <SelectItem value='unauthorized'>Unauthorized</SelectItem>
