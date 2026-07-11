@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import {
+  ChevronLeft,
   MessageSquare,
   Search,
   Send,
@@ -182,8 +183,8 @@ export function Chat() {
 
   return (
     <div className='flex h-[calc(100vh-4rem)] overflow-hidden'>
-      {/* Sidebar */}
-      <div className='flex w-80 shrink-0 flex-col border-r'>
+      {/* Sidebar — full-width on mobile when no chat open, fixed width on desktop */}
+      <div className={`flex flex-col border-r ${selectedId ? 'hidden md:flex md:w-80 md:shrink-0' : 'w-full md:w-80 md:shrink-0'}`}>
         <div className='space-y-2 p-4'>
           <h2 className='text-lg font-semibold'>Support Chat</h2>
           <div className='relative'>
@@ -266,10 +267,18 @@ export function Chat() {
 
       {/* Chat area */}
       {selectedConv ? (
-        <div className='flex flex-1 flex-col overflow-hidden'>
+        <div className='flex flex-1 flex-col overflow-hidden min-h-0'>
           {/* Header */}
-          <div className='flex items-center gap-3 border-b px-6 py-4'>
-            <Avatar className='h-9 w-9'>
+          <div className='flex items-center gap-3 border-b px-4 py-3'>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='md:hidden shrink-0'
+              onClick={() => setSelectedId(null)}
+            >
+              <ChevronLeft className='h-5 w-5' />
+            </Button>
+            <Avatar className='h-9 w-9 shrink-0'>
               <AvatarImage src={selectedConv.user.avatar ?? undefined} />
               <AvatarFallback>{initials(selectedConv.user.name)}</AvatarFallback>
             </Avatar>
@@ -285,7 +294,7 @@ export function Chat() {
           </div>
 
           {/* Messages */}
-          <ScrollArea className='flex-1 px-6 py-4'>
+          <ScrollArea className='flex-1 min-h-0 px-4 py-4'>
             {loadingMsgs ? (
               <div className='text-center text-sm text-muted-foreground'>Loading...</div>
             ) : messages.length === 0 ? (
@@ -333,7 +342,7 @@ export function Chat() {
           </div>
         </div>
       ) : (
-        <div className='flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground'>
+        <div className='hidden md:flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground'>
           <UserCircle2 className='h-16 w-16' />
           <p className='text-sm'>Select a conversation or start a new one</p>
         </div>
