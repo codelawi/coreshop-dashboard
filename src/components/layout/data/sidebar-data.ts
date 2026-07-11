@@ -13,6 +13,7 @@ import {
   Star,
   Wallet,
   Truck,
+  Shield,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -117,6 +118,16 @@ export const sidebarData: SidebarData = {
           title: 'Payment Settings',
           url: '/payment',
           icon: CreditCard,
+        },
+      ],
+    },
+    {
+      title: 'System',
+      items: [
+        {
+          title: 'Security',
+          url: '/security',
+          icon: Shield,
         },
       ],
     },
