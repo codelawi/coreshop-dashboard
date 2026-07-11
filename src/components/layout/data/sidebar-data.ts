@@ -14,6 +14,7 @@ import {
   Wallet,
   Truck,
   Shield,
+  MessageSquare,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -124,6 +125,11 @@ export const sidebarData: SidebarData = {
     {
       title: 'System',
       items: [
+        {
+          title: 'Support Chat',
+          url: '/chat',
+          icon: MessageSquare,
+        },
         {
           title: 'Security',
           url: '/security',
