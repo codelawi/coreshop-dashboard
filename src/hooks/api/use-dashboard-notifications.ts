@@ -43,7 +43,7 @@ export function useMarkNotificationRead() {
 export function useMarkAllNotificationsRead() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (type?: string) => {
+    mutationFn: async (type: string | void) => {
       await api.post('/admin/dashboard-notifications/read-all', type ? { type } : undefined)
     },
     onSuccess: () => {

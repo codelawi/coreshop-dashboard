@@ -32,6 +32,7 @@ import { Route as AuthenticatedPayoutsIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedPaymentIndexRouteImport } from './routes/_authenticated/payment/index'
 import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders/index'
 import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications/index'
+import { Route as AuthenticatedLogsIndexRouteImport } from './routes/_authenticated/logs/index'
 import { Route as AuthenticatedDriversIndexRouteImport } from './routes/_authenticated/drivers/index'
 import { Route as AuthenticatedCouponsIndexRouteImport } from './routes/_authenticated/coupons/index'
 import { Route as AuthenticatedChatIndexRouteImport } from './routes/_authenticated/chat/index'
@@ -169,6 +170,11 @@ const AuthenticatedNotificationsIndexRoute =
     path: '/notifications/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedLogsIndexRoute = AuthenticatedLogsIndexRouteImport.update({
+  id: '/logs/',
+  path: '/logs/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDriversIndexRoute =
   AuthenticatedDriversIndexRouteImport.update({
     id: '/drivers/',
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/chat/': typeof AuthenticatedChatIndexRoute
   '/coupons/': typeof AuthenticatedCouponsIndexRoute
   '/drivers/': typeof AuthenticatedDriversIndexRoute
+  '/logs/': typeof AuthenticatedLogsIndexRoute
   '/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/orders/': typeof AuthenticatedOrdersIndexRoute
   '/payment/': typeof AuthenticatedPaymentIndexRoute
@@ -300,6 +307,7 @@ export interface FileRoutesByTo {
   '/chat': typeof AuthenticatedChatIndexRoute
   '/coupons': typeof AuthenticatedCouponsIndexRoute
   '/drivers': typeof AuthenticatedDriversIndexRoute
+  '/logs': typeof AuthenticatedLogsIndexRoute
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
   '/payment': typeof AuthenticatedPaymentIndexRoute
@@ -338,6 +346,7 @@ export interface FileRoutesById {
   '/_authenticated/chat/': typeof AuthenticatedChatIndexRoute
   '/_authenticated/coupons/': typeof AuthenticatedCouponsIndexRoute
   '/_authenticated/drivers/': typeof AuthenticatedDriversIndexRoute
+  '/_authenticated/logs/': typeof AuthenticatedLogsIndexRoute
   '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
   '/_authenticated/payment/': typeof AuthenticatedPaymentIndexRoute
@@ -376,6 +385,7 @@ export interface FileRouteTypes {
     | '/chat/'
     | '/coupons/'
     | '/drivers/'
+    | '/logs/'
     | '/notifications/'
     | '/orders/'
     | '/payment/'
@@ -411,6 +421,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/coupons'
     | '/drivers'
+    | '/logs'
     | '/notifications'
     | '/orders'
     | '/payment'
@@ -448,6 +459,7 @@ export interface FileRouteTypes {
     | '/_authenticated/chat/'
     | '/_authenticated/coupons/'
     | '/_authenticated/drivers/'
+    | '/_authenticated/logs/'
     | '/_authenticated/notifications/'
     | '/_authenticated/orders/'
     | '/_authenticated/payment/'
@@ -638,6 +650,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNotificationsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/logs/': {
+      id: '/_authenticated/logs/'
+      path: '/logs'
+      fullPath: '/logs/'
+      preLoaderRoute: typeof AuthenticatedLogsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/drivers/': {
       id: '/_authenticated/drivers/'
       path: '/drivers'
@@ -758,6 +777,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedChatIndexRoute: typeof AuthenticatedChatIndexRoute
   AuthenticatedCouponsIndexRoute: typeof AuthenticatedCouponsIndexRoute
   AuthenticatedDriversIndexRoute: typeof AuthenticatedDriversIndexRoute
+  AuthenticatedLogsIndexRoute: typeof AuthenticatedLogsIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedOrdersIndexRoute: typeof AuthenticatedOrdersIndexRoute
   AuthenticatedPaymentIndexRoute: typeof AuthenticatedPaymentIndexRoute
@@ -780,6 +800,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChatIndexRoute: AuthenticatedChatIndexRoute,
   AuthenticatedCouponsIndexRoute: AuthenticatedCouponsIndexRoute,
   AuthenticatedDriversIndexRoute: AuthenticatedDriversIndexRoute,
+  AuthenticatedLogsIndexRoute: AuthenticatedLogsIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedOrdersIndexRoute: AuthenticatedOrdersIndexRoute,
   AuthenticatedPaymentIndexRoute: AuthenticatedPaymentIndexRoute,

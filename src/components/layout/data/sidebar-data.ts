@@ -15,6 +15,7 @@ import {
   Truck,
   Shield,
   MessageSquare,
+  ScrollText,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -134,6 +135,11 @@ export const sidebarData: SidebarData = {
           title: 'Security',
           url: '/security',
           icon: Shield,
+        },
+        {
+          title: 'Server Logs',
+          url: '/logs',
+          icon: ScrollText,
         },
       ],
     },
