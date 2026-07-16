@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useAuthStore } from '@/stores/auth-store'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
+import { useLogErrorNotifications } from '@/hooks/api/use-logs'
 
 export const Route = createFileRoute('/_authenticated')({
   beforeLoad: ({ location }) => {
@@ -24,6 +25,8 @@ function AuthenticatedRoute() {
   useEffect(() => {
     fetchMe()
   }, [fetchMe])
+
+  useLogErrorNotifications()
 
   return <AuthenticatedLayout />
 }

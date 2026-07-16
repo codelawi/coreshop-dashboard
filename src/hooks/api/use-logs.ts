@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '@/lib/axios'
 
@@ -46,6 +47,56 @@ export function useLogs(filters: LogFilters = {}) {
     staleTime: 15_000,
     refetchInterval: 30_000,
   })
+}
+
+const ERROR_LEVELS: LogLevel[] = ['emergency', 'alert', 'critical', 'error']
+
+export function useLogErrorNotifications() {
+  const latestTimestamp = useRef<string | null>(null)
+  const initialized = useRef(false)
+
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      void Notification.requestPermission()
+    }
+  }, [])
+
+  const { data } = useQuery({
+    queryKey: ['log-error-alert'],
+    queryFn: async () => {
+      const res = await api.get('/admin/logs', { params: { limit: 50 } })
+      return res.data as { data: LogEntry[]; meta: LogMeta }
+    },
+    staleTime: 0,
+    refetchInterval: 60_000,
+  })
+
+  useEffect(() => {
+    if (!data) { return }
+
+    const errors = data.data.filter((e) => ERROR_LEVELS.includes(e.level))
+    if (errors.length === 0) { return }
+
+    const newest = errors[0].timestamp
+
+    if (!initialized.current) {
+      latestTimestamp.current = newest
+      initialized.current = true
+      return
+    }
+
+    if (latestTimestamp.current && newest > latestTimestamp.current) {
+      latestTimestamp.current = newest
+
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Server Error', {
+          body: errors[0].message.slice(0, 120),
+          icon: '/favicon.ico',
+          tag: 'server-log-error',
+        })
+      }
+    }
+  }, [data])
 }
 
 export function useClearLogs() {
