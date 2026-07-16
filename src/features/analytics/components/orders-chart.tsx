@@ -18,19 +18,17 @@ import {
 } from '@/components/ui/card'
 
 const MONTHS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ]
+
+const tooltipStyle = {
+  background: 'var(--color-popover)',
+  border: '1px solid var(--color-border)',
+  color: 'var(--color-popover-foreground)',
+  borderRadius: '8px',
+  fontSize: '12px',
+}
 
 interface MonthlyPoint {
   month: number
@@ -58,35 +56,28 @@ export function OrdersChart() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className='flex h-[300px] items-center justify-center'>
+          <div className='flex h-75 items-center justify-center'>
             <Loader2 className='h-6 w-6 animate-spin text-muted-foreground' />
           </div>
         ) : (
           <ResponsiveContainer width='100%' height={300}>
             <BarChart data={chartData}>
-              <CartesianGrid
-                strokeDasharray='3 3'
-                stroke='hsl(var(--border))'
-              />
+              <CartesianGrid strokeDasharray='3 3' stroke='var(--color-border)' />
               <XAxis
                 dataKey='month'
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                stroke='hsl(var(--muted-foreground))'
+                stroke='var(--color-muted-foreground)'
               />
               <YAxis
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                stroke='hsl(var(--muted-foreground))'
+                stroke='var(--color-muted-foreground)'
               />
-              <Tooltip formatter={(v) => [v, 'Orders']} />
-              <Bar
-                dataKey='orders'
-                fill='hsl(var(--primary))'
-                radius={[4, 4, 0, 0]}
-              />
+              <Tooltip formatter={(v) => [v, 'Orders']} contentStyle={tooltipStyle} />
+              <Bar dataKey='orders' fill='var(--color-chart-1)' radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}

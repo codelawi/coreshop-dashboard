@@ -1,6 +1,6 @@
 import { Loader2 } from 'lucide-react'
 import { useOrders } from '@/hooks/api/use-orders'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 
 interface Order {
@@ -9,6 +9,7 @@ interface Order {
     id: number
     name: string
     email: string
+    avatar?: string | null
   }
   status: string
   total: string | number
@@ -62,6 +63,7 @@ export function RecentSales() {
       {orders.slice(0, 5).map((order) => (
         <div key={order.id} className='flex items-center gap-4'>
           <Avatar className='h-9 w-9'>
+            <AvatarImage src={order.client.avatar ?? undefined} />
             <AvatarFallback>{getInitials(order.client.name)}</AvatarFallback>
           </Avatar>
           <div className='flex flex-1 flex-wrap items-center justify-between gap-2'>

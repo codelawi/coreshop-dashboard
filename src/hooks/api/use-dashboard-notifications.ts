@@ -3,7 +3,7 @@ import api from '@/lib/axios'
 
 export interface DashboardNotification {
   id: number
-  type: 'new_order' | 'new_product' | 'new_user'
+  type: 'new_order' | 'new_product' | 'new_user' | 'new_support_message'
   title: string
   body: string
   data: Record<string, unknown> | null
@@ -43,8 +43,8 @@ export function useMarkNotificationRead() {
 export function useMarkAllNotificationsRead() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async () => {
-      await api.post('/admin/dashboard-notifications/read-all')
+    mutationFn: async (type?: string) => {
+      await api.post('/admin/dashboard-notifications/read-all', type ? { type } : undefined)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-notifications'] })

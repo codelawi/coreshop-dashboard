@@ -18,19 +18,17 @@ import {
 } from '@/components/ui/card'
 
 const MONTHS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ]
+
+const tooltipStyle = {
+  background: 'var(--color-popover)',
+  border: '1px solid var(--color-border)',
+  color: 'var(--color-popover-foreground)',
+  borderRadius: '8px',
+  fontSize: '12px',
+}
 
 interface ApiPoint {
   month: number
@@ -56,55 +54,41 @@ export function RevenueChart() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className='flex h-[300px] items-center justify-center'>
+          <div className='flex h-75 items-center justify-center'>
             <Loader2 className='h-6 w-6 animate-spin text-muted-foreground' />
           </div>
         ) : (
           <ResponsiveContainer width='100%' height={300}>
             <AreaChart data={chartData}>
               <defs>
-                <linearGradient
-                  id='revenueGradient'
-                  x1='0'
-                  y1='0'
-                  x2='0'
-                  y2='1'
-                >
-                  <stop
-                    offset='5%'
-                    stopColor='hsl(var(--primary))'
-                    stopOpacity={0.3}
-                  />
-                  <stop
-                    offset='95%'
-                    stopColor='hsl(var(--primary))'
-                    stopOpacity={0}
-                  />
+                <linearGradient id='revenueGradient' x1='0' y1='0' x2='0' y2='1'>
+                  <stop offset='5%' stopColor='var(--color-chart-1)' stopOpacity={0.3} />
+                  <stop offset='95%' stopColor='var(--color-chart-1)' stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid
-                strokeDasharray='3 3'
-                stroke='hsl(var(--border))'
-              />
+              <CartesianGrid strokeDasharray='3 3' stroke='var(--color-border)' />
               <XAxis
                 dataKey='month'
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                stroke='hsl(var(--muted-foreground))'
+                stroke='var(--color-muted-foreground)'
               />
               <YAxis
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                stroke='hsl(var(--muted-foreground))'
+                stroke='var(--color-muted-foreground)'
                 tickFormatter={(v) => `JOD ${v}`}
               />
-              <Tooltip formatter={(v) => [`JOD ${v}`, 'Revenue']} />
+              <Tooltip
+                formatter={(v) => [`JOD ${v}`, 'Revenue']}
+                contentStyle={tooltipStyle}
+              />
               <Area
                 type='monotone'
                 dataKey='revenue'
-                stroke='hsl(var(--primary))'
+                stroke='var(--color-chart-1)'
                 fill='url(#revenueGradient)'
                 strokeWidth={2}
               />

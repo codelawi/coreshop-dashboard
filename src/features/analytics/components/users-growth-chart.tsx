@@ -19,19 +19,17 @@ import {
 } from '@/components/ui/card'
 
 const MONTHS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ]
+
+const tooltipStyle = {
+  background: 'var(--color-popover)',
+  border: '1px solid var(--color-border)',
+  color: 'var(--color-popover-foreground)',
+  borderRadius: '8px',
+  fontSize: '12px',
+}
 
 interface UserPoint {
   month: number
@@ -49,8 +47,8 @@ export function UsersGrowthChart() {
   points.forEach((p) => {
     const month = Number(p.month)
     const total = Number(p.total)
-    if (p.role === 'client') clientsByMonth.set(month, total)
-    if (p.role === 'seller') sellersByMonth.set(month, total)
+    if (p.role === 'client') { clientsByMonth.set(month, total) }
+    if (p.role === 'seller') { sellersByMonth.set(month, total) }
   })
 
   const chartData = MONTHS.map((m, i) => ({
@@ -67,42 +65,39 @@ export function UsersGrowthChart() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className='flex h-[300px] items-center justify-center'>
+          <div className='flex h-75 items-center justify-center'>
             <Loader2 className='h-6 w-6 animate-spin text-muted-foreground' />
           </div>
         ) : (
           <ResponsiveContainer width='100%' height={300}>
             <LineChart data={chartData}>
-              <CartesianGrid
-                strokeDasharray='3 3'
-                stroke='hsl(var(--border))'
-              />
+              <CartesianGrid strokeDasharray='3 3' stroke='var(--color-border)' />
               <XAxis
                 dataKey='month'
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                stroke='hsl(var(--muted-foreground))'
+                stroke='var(--color-muted-foreground)'
               />
               <YAxis
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                stroke='hsl(var(--muted-foreground))'
+                stroke='var(--color-muted-foreground)'
               />
-              <Tooltip />
+              <Tooltip contentStyle={tooltipStyle} />
               <Legend />
               <Line
                 type='monotone'
                 dataKey='clients'
-                stroke='hsl(217, 91%, 60%)'
+                stroke='var(--color-chart-1)'
                 strokeWidth={2}
                 dot={false}
               />
               <Line
                 type='monotone'
                 dataKey='sellers'
-                stroke='hsl(142, 71%, 45%)'
+                stroke='var(--color-chart-2)'
                 strokeWidth={2}
                 dot={false}
               />

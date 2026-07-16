@@ -29,10 +29,17 @@ interface RevenuePoint {
   total: string | number
 }
 
+const tooltipStyle = {
+  background: 'var(--color-popover)',
+  border: '1px solid var(--color-border)',
+  color: 'var(--color-popover-foreground)',
+  borderRadius: '8px',
+  fontSize: '12px',
+}
+
 export function Overview() {
   const { data, isLoading } = useAnalyticsRevenue()
 
-  // Build a complete 12-month series (fill missing months with 0)
   const apiData: RevenuePoint[] = data?.data ?? []
   const byMonth = new Map<number, number>()
   apiData.forEach((p) => {
@@ -57,24 +64,26 @@ export function Overview() {
       <BarChart data={chartData}>
         <XAxis
           dataKey='name'
-          stroke='#888888'
+          stroke='var(--color-muted-foreground)'
           fontSize={12}
           tickLine={false}
           axisLine={false}
         />
         <YAxis
-          stroke='#888888'
+          stroke='var(--color-muted-foreground)'
           fontSize={12}
           tickLine={false}
           axisLine={false}
           tickFormatter={(value) => `JOD ${value}`}
         />
-        <Tooltip formatter={(value) => [`JOD ${Number(value).toFixed(2)}`, 'Revenue']} />
+        <Tooltip
+          formatter={(value) => [`JOD ${Number(value).toFixed(2)}`, 'Revenue']}
+          contentStyle={tooltipStyle}
+        />
         <Bar
           dataKey='revenue'
-          fill='currentColor'
+          fill='var(--color-chart-1)'
           radius={[4, 4, 0, 0]}
-          className='fill-primary'
         />
       </BarChart>
     </ResponsiveContainer>

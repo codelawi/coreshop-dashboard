@@ -17,6 +17,9 @@ import {
   useSecurityEvents,
   useSecurityStats,
 } from '@/hooks/api/use-security-events'
+import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
+import { ThemeSwitch } from '@/components/theme-switch'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
@@ -137,7 +140,14 @@ export function Security() {
   }
 
   return (
-    <div className='space-y-6 p-6'>
+    <>
+      <Header fixed>
+        <div className='ms-auto flex items-center gap-2'>
+          <ThemeSwitch />
+        </div>
+      </Header>
+
+      <Main>
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           <Shield className='h-6 w-6' />
@@ -147,7 +157,7 @@ export function Security() {
           href='https://hpanel.hostinger.com/websites/coreshop.io/advanced/ip-manager'
           target='_blank'
           rel='noopener noreferrer'
-          className='flex items-center gap-2 rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90'
+          className='flex items-center gap-2 rounded-md bg-destructive px-4 py-2 text-sm font-medium text-white hover:bg-destructive/90'
         >
           <ExternalLink className='h-4 w-4' />
           Take Action
@@ -341,7 +351,7 @@ export function Security() {
                     <TableCell className='text-sm'>
                       {event.country ?? '—'}
                     </TableCell>
-                    <TableCell className='max-w-[200px] truncate font-mono text-xs'>
+                    <TableCell className='max-w-50 truncate font-mono text-xs'>
                       <span className='mr-1 text-muted-foreground'>
                         {event.method}
                       </span>
@@ -380,6 +390,7 @@ export function Security() {
           </button>
         </div>
       )}
-    </div>
+      </Main>
+    </>
   )
 }

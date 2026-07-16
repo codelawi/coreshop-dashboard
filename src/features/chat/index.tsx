@@ -18,6 +18,7 @@ import {
 } from '@/hooks/api/use-support-chat'
 import { useUsers } from '@/hooks/api/use-users'
 import { useAuthStore } from '@/stores/auth-store'
+import { useMarkAllNotificationsRead } from '@/hooks/api/use-dashboard-notifications'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -32,6 +33,8 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
+import { Header } from '@/components/layout/header'
+import { ThemeSwitch } from '@/components/theme-switch'
 
 function initials(name: string) {
   return name
@@ -65,9 +68,9 @@ function ConversationItem({
         <AvatarImage src={conv.user.avatar ?? undefined} />
         <AvatarFallback>{initials(conv.user.name)}</AvatarFallback>
       </Avatar>
-      <div className='min-w-0 flex-1'>
-        <div className='flex items-center justify-between gap-2'>
-          <span className='truncate text-sm font-medium'>{conv.user.name}</span>
+      <div className='min-w-0 flex-1 overflow-hidden'>
+        <div className='flex min-w-0 items-center justify-between gap-2 overflow-hidden'>
+          <span className='min-w-0 truncate text-sm font-medium'>{conv.user.name}</span>
           {conv.last_message_at && (
             <span className='shrink-0 text-xs text-muted-foreground'>
               {formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: true })}
@@ -142,6 +145,12 @@ export function Chat() {
   const startConversation = useOrStartSupportConversation()
   useSupportChannel(selectedId)
 
+  const markAllRead = useMarkAllNotificationsRead()
+  useEffect(() => {
+    markAllRead.mutate('new_support_message')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -156,7 +165,7 @@ export function Chat() {
 
   const handleSend = () => {
     const text = body.trim()
-    if (!text || sendMessage.isPending || !selectedId) return
+    if (!text || sendMessage.isPending || !selectedId) { return }
     setBody('')
     sendMessage.mutate(text)
   }
@@ -169,7 +178,7 @@ export function Chat() {
   }
 
   const handleStartConversation = () => {
-    if (!newUserId) return
+    if (!newUserId) { return }
     startConversation.mutate(Number(newUserId), {
       onSuccess: (conv) => {
         setSelectedId(conv.id)
@@ -182,171 +191,179 @@ export function Chat() {
   const selectedNewUser = nonAdminUsers.find((u) => String(u.id) === newUserId)
 
   return (
-    <div className='flex h-[calc(100vh-4rem)] overflow-hidden'>
-      {/* Sidebar — full-width on mobile when no chat open, fixed width on desktop */}
-      <div className={`flex flex-col border-r ${selectedId ? 'hidden md:flex md:w-80 md:shrink-0' : 'w-full md:w-80 md:shrink-0'}`}>
-        <div className='space-y-2 p-4'>
-          <h2 className='text-lg font-semibold'>Support Chat</h2>
-          <div className='relative'>
-            <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
-            <Input
-              placeholder='Search conversations...'
-              className='pl-8'
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <div className='flex gap-2'>
-            <Select value={newUserId} onValueChange={setNewUserId}>
-              <SelectTrigger className='flex-1 text-xs'>
-                {selectedNewUser ? (
-                  <div className='flex items-center gap-2'>
-                    <Avatar className='h-5 w-5 shrink-0'>
-                      <AvatarImage src={selectedNewUser.avatar ?? undefined} />
-                      <AvatarFallback className='text-[10px]'>
-                        {initials(selectedNewUser.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className='truncate'>{selectedNewUser.name}</span>
-                  </div>
-                ) : (
-                  <SelectValue placeholder='Start with user...' />
-                )}
-              </SelectTrigger>
-              <SelectContent>
-                {nonAdminUsers.map((u) => (
-                  <SelectItem key={u.id} value={String(u.id)}>
+    <>
+      <Header fixed>
+        <div className='ms-auto flex items-center gap-2'>
+          <ThemeSwitch />
+        </div>
+      </Header>
+
+      <div className='flex h-[calc(100svh-4rem)] overflow-hidden'>
+        {/* Sidebar — full-width on mobile when no chat open, fixed width on desktop */}
+        <div className={`flex flex-col border-r ${selectedId ? 'hidden md:flex md:w-80 md:shrink-0' : 'w-full md:w-80 md:shrink-0'}`}>
+          <div className='space-y-2 p-4'>
+            <h2 className='text-lg font-semibold'>Support Chat</h2>
+            <div className='relative'>
+              <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
+              <Input
+                placeholder='Search conversations...'
+                className='pl-8'
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <div className='flex gap-2'>
+              <Select value={newUserId} onValueChange={setNewUserId}>
+                <SelectTrigger className='flex-1 text-xs'>
+                  {selectedNewUser ? (
                     <div className='flex items-center gap-2'>
-                      <Avatar className='h-6 w-6 shrink-0'>
-                        <AvatarImage src={u.avatar ?? undefined} />
+                      <Avatar className='h-5 w-5 shrink-0'>
+                        <AvatarImage src={selectedNewUser.avatar ?? undefined} />
                         <AvatarFallback className='text-[10px]'>
-                          {initials(u.name)}
+                          {initials(selectedNewUser.name)}
                         </AvatarFallback>
                       </Avatar>
-                      <div className='flex flex-col'>
-                        <span className='text-sm'>{u.name}</span>
-                        <span className='text-xs capitalize text-muted-foreground'>{u.role}</span>
-                      </div>
+                      <span className='truncate'>{selectedNewUser.name}</span>
                     </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              size='sm'
-              disabled={!newUserId || startConversation.isPending}
-              onClick={handleStartConversation}
-            >
-              Go
-            </Button>
-          </div>
-        </div>
-
-        <Separator />
-
-        <ScrollArea className='flex-1'>
-          {loadingConvs ? (
-            <div className='p-4 text-center text-sm text-muted-foreground'>Loading...</div>
-          ) : filtered.length === 0 ? (
-            <div className='p-8 text-center text-sm text-muted-foreground'>
-              No conversations yet.
+                  ) : (
+                    <SelectValue placeholder='Start with user...' />
+                  )}
+                </SelectTrigger>
+                <SelectContent>
+                  {nonAdminUsers.map((u) => (
+                    <SelectItem key={u.id} value={String(u.id)}>
+                      <div className='flex items-center gap-2'>
+                        <Avatar className='h-6 w-6 shrink-0'>
+                          <AvatarImage src={u.avatar ?? undefined} />
+                          <AvatarFallback className='text-[10px]'>
+                            {initials(u.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className='flex flex-col'>
+                          <span className='text-sm'>{u.name}</span>
+                          <span className='text-xs capitalize text-muted-foreground'>{u.role}</span>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                size='sm'
+                disabled={!newUserId || startConversation.isPending}
+                onClick={handleStartConversation}
+              >
+                Go
+              </Button>
             </div>
-          ) : (
-            filtered.map((conv) => (
-              <ConversationItem
-                key={conv.id}
-                conv={conv}
-                selected={conv.id === selectedId}
-                adminId={adminId}
-                onClick={() => setSelectedId(conv.id)}
-              />
-            ))
-          )}
-        </ScrollArea>
-      </div>
-
-      {/* Chat area */}
-      {selectedConv ? (
-        <div className='flex flex-1 flex-col overflow-hidden min-h-0'>
-          {/* Header */}
-          <div className='flex items-center gap-3 border-b px-4 py-3'>
-            <Button
-              variant='ghost'
-              size='icon'
-              className='md:hidden shrink-0'
-              onClick={() => setSelectedId(null)}
-            >
-              <ChevronLeft className='h-5 w-5' />
-            </Button>
-            <Avatar className='h-9 w-9 shrink-0'>
-              <AvatarImage src={selectedConv.user.avatar ?? undefined} />
-              <AvatarFallback>{initials(selectedConv.user.name)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className='font-medium leading-none'>{selectedConv.user.name}</p>
-              <p className='mt-0.5 text-xs text-muted-foreground capitalize'>
-                {selectedConv.user.role}
-              </p>
-            </div>
-            <Badge variant='outline' className='ml-auto capitalize'>
-              {selectedConv.user.role}
-            </Badge>
           </div>
 
-          {/* Messages */}
-          <ScrollArea className='flex-1 min-h-0 px-4 py-4'>
-            {loadingMsgs ? (
-              <div className='text-center text-sm text-muted-foreground'>Loading...</div>
-            ) : messages.length === 0 ? (
-              <div className='flex flex-col items-center justify-center gap-2 py-20 text-muted-foreground'>
-                <MessageSquare className='h-10 w-10' />
-                <p className='text-sm'>No messages yet. Say hello!</p>
+          <Separator />
+
+          <ScrollArea className='flex-1'>
+            {loadingConvs ? (
+              <div className='p-4 text-center text-sm text-muted-foreground'>Loading...</div>
+            ) : filtered.length === 0 ? (
+              <div className='p-8 text-center text-sm text-muted-foreground'>
+                No conversations yet.
               </div>
             ) : (
-              messages.map((msg) => (
-                <MessageBubble key={msg.id} msg={msg} adminId={adminId} />
+              filtered.map((conv) => (
+                <ConversationItem
+                  key={conv.id}
+                  conv={conv}
+                  selected={conv.id === selectedId}
+                  adminId={adminId}
+                  onClick={() => setSelectedId(conv.id)}
+                />
               ))
             )}
-            <div ref={bottomRef} />
           </ScrollArea>
+        </div>
 
-          {/* Input */}
-          <div className='border-t px-4 py-3'>
-            <div className='flex flex-col gap-2'>
-              <Textarea
-                placeholder='Type a message...'
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={sendMessage.isPending}
-                rows={3}
-                className='resize-none text-sm'
-              />
-              <div className='flex items-center justify-between'>
-                <span className='text-xs text-muted-foreground'>
-                  <kbd className='rounded border px-1 py-0.5 text-[10px] font-mono'>Ctrl</kbd>
-                  {' + '}
-                  <kbd className='rounded border px-1 py-0.5 text-[10px] font-mono'>Enter</kbd>
-                  {' to send'}
-                </span>
-                <Button
-                  size='sm'
-                  onClick={handleSend}
-                  disabled={!body.trim() || sendMessage.isPending}
-                >
-                  <Send className='mr-1.5 h-3.5 w-3.5' />
-                  Send
-                </Button>
+        {/* Chat area */}
+        {selectedConv ? (
+          <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
+            {/* Header */}
+            <div className='flex items-center gap-3 border-b px-4 py-3'>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='shrink-0 md:hidden'
+                onClick={() => setSelectedId(null)}
+              >
+                <ChevronLeft className='h-5 w-5' />
+              </Button>
+              <Avatar className='h-9 w-9 shrink-0'>
+                <AvatarImage src={selectedConv.user.avatar ?? undefined} />
+                <AvatarFallback>{initials(selectedConv.user.name)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className='font-medium leading-none'>{selectedConv.user.name}</p>
+                <p className='mt-0.5 text-xs text-muted-foreground capitalize'>
+                  {selectedConv.user.role}
+                </p>
+              </div>
+              <Badge variant='outline' className='ml-auto capitalize'>
+                {selectedConv.user.role}
+              </Badge>
+            </div>
+
+            {/* Messages */}
+            <ScrollArea className='min-h-0 flex-1 px-4 py-4'>
+              {loadingMsgs ? (
+                <div className='text-center text-sm text-muted-foreground'>Loading...</div>
+              ) : messages.length === 0 ? (
+                <div className='flex flex-col items-center justify-center gap-2 py-20 text-muted-foreground'>
+                  <MessageSquare className='h-10 w-10' />
+                  <p className='text-sm'>No messages yet. Say hello!</p>
+                </div>
+              ) : (
+                messages.map((msg) => (
+                  <MessageBubble key={msg.id} msg={msg} adminId={adminId} />
+                ))
+              )}
+              <div ref={bottomRef} />
+            </ScrollArea>
+
+            {/* Input */}
+            <div className='border-t px-4 py-3'>
+              <div className='flex flex-col gap-2'>
+                <Textarea
+                  placeholder='Type a message...'
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={sendMessage.isPending}
+                  rows={3}
+                  className='resize-none text-sm'
+                />
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs text-muted-foreground'>
+                    <kbd className='rounded border px-1 py-0.5 font-mono text-[10px]'>Ctrl</kbd>
+                    {' + '}
+                    <kbd className='rounded border px-1 py-0.5 font-mono text-[10px]'>Enter</kbd>
+                    {' to send'}
+                  </span>
+                  <Button
+                    size='sm'
+                    onClick={handleSend}
+                    disabled={!body.trim() || sendMessage.isPending}
+                  >
+                    <Send className='mr-1.5 h-3.5 w-3.5' />
+                    Send
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <div className='hidden md:flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground'>
-          <UserCircle2 className='h-16 w-16' />
-          <p className='text-sm'>Select a conversation or start a new one</p>
-        </div>
-      )}
-    </div>
+        ) : (
+          <div className='hidden flex-1 flex-col items-center justify-center gap-3 text-muted-foreground md:flex'>
+            <UserCircle2 className='h-16 w-16' />
+            <p className='text-sm'>Select a conversation or start a new one</p>
+          </div>
+        )}
+      </div>
+    </>
   )
 }

@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Loader2, CalendarDays } from 'lucide-react'
 import { useOrders } from '@/hooks/api/use-orders'
+import { useMarkAllNotificationsRead } from '@/hooks/api/use-dashboard-notifications'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { Search } from '@/components/search'
@@ -13,6 +14,12 @@ import type { Order } from './data/schema'
 export function Orders() {
   const { data, isLoading } = useOrders({ per_page: 100 })
   const orders: Order[] = data?.data ?? []
+  const markAllRead = useMarkAllNotificationsRead()
+
+  useEffect(() => {
+    markAllRead.mutate('new_order')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')

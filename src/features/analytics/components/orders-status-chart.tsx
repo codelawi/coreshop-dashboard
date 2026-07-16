@@ -55,11 +55,11 @@ export function OrdersStatusChart() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className='flex h-[300px] items-center justify-center'>
+          <div className='flex h-75 items-center justify-center'>
             <Loader2 className='h-6 w-6 animate-spin text-muted-foreground' />
           </div>
         ) : chartData.length === 0 ? (
-          <div className='flex h-[300px] items-center justify-center'>
+          <div className='flex h-75 items-center justify-center'>
             <p className='text-sm text-muted-foreground'>No orders yet.</p>
           </div>
         ) : (
@@ -81,7 +81,16 @@ export function OrdersStatusChart() {
                   />
                 ))}
               </Pie>
-              <Tooltip formatter={(v, n) => [v, n]} />
+              <Tooltip
+                formatter={(v, n) => [v, n]}
+                contentStyle={{
+                  background: 'var(--color-popover)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-popover-foreground)',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                }}
+              />
               <Legend />
             </PieChart>
           </ResponsiveContainer>

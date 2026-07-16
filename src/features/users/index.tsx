@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useUsers } from '@/hooks/api/use-users'
+import { useMarkAllNotificationsRead } from '@/hooks/api/use-dashboard-notifications'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { Search } from '@/components/search'
@@ -12,6 +14,12 @@ import type { User } from './data/schema'
 export function Users() {
   const { data, isLoading } = useUsers({ per_page: 100 })
   const users: User[] = data?.data ?? []
+  const markAllRead = useMarkAllNotificationsRead()
+
+  useEffect(() => {
+    markAllRead.mutate('new_user')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <UsersProvider>

@@ -14,10 +14,11 @@ import { NavGroup } from './nav-group'
 import { NavUser } from './nav-user'
 import type { NavGroup as NavGroupType } from './types'
 
-const BADGE_ROUTE_TYPE: Record<string, 'new_order' | 'new_product' | 'new_user'> = {
+const BADGE_ROUTE_TYPE: Record<string, 'new_order' | 'new_product' | 'new_user' | 'new_support_message'> = {
   '/orders': 'new_order',
   '/products': 'new_product',
   '/users': 'new_user',
+  '/chat': 'new_support_message',
 }
 
 export function AppSidebar() {
