@@ -36,6 +36,18 @@ import { Textarea } from '@/components/ui/textarea'
 import { Header } from '@/components/layout/header'
 import { ThemeSwitch } from '@/components/theme-switch'
 
+function compactTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const m = Math.floor(diff / 60_000)
+  if (m < 1) { return 'now' }
+  if (m < 60) { return `${m}m` }
+  const h = Math.floor(m / 60)
+  if (h < 24) { return `${h}h` }
+  const d = Math.floor(h / 24)
+  if (d < 7) { return `${d}d` }
+  return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
 function initials(name: string) {
   return name
     .split(' ')
@@ -68,17 +80,17 @@ function ConversationItem({
         <AvatarImage src={conv.user.avatar ?? undefined} />
         <AvatarFallback>{initials(conv.user.name)}</AvatarFallback>
       </Avatar>
-      <div className='min-w-0 flex-1 overflow-hidden'>
-        <div className='flex min-w-0 items-center justify-between gap-2 overflow-hidden'>
-          <span className='min-w-0 truncate text-sm font-medium'>{conv.user.name}</span>
+      <div className='min-w-0 flex-1'>
+        <div className='flex items-center gap-2'>
+          <span className='min-w-0 flex-1 truncate text-sm font-medium'>{conv.user.name}</span>
           {conv.last_message_at && (
             <span className='shrink-0 text-xs text-muted-foreground'>
-              {formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: true })}
+              {compactTime(conv.last_message_at)}
             </span>
           )}
         </div>
         {last && (
-          <p className='truncate text-xs text-muted-foreground'>
+          <p className='mt-0.5 truncate text-xs text-muted-foreground'>
             {isFromAdmin ? 'You: ' : ''}
             {last.body}
           </p>
@@ -198,7 +210,7 @@ export function Chat() {
         </div>
       </Header>
 
-      <div className='flex h-[calc(100svh-4rem)] overflow-hidden'>
+      <div data-layout='fixed' className='flex h-[calc(100svh-4rem)] overflow-hidden'>
         {/* Sidebar — full-width on mobile when no chat open, fixed width on desktop */}
         <div className={`flex flex-col border-r ${selectedId ? 'hidden md:flex md:w-80 md:shrink-0' : 'w-full md:w-80 md:shrink-0'}`}>
           <div className='space-y-2 p-4'>
