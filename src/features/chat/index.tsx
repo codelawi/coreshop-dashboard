@@ -74,21 +74,14 @@ function ConversationItem({
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50 ${selected ? 'bg-muted' : ''}`}
+      className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50 ${selected ? 'bg-muted' : ''}`}
     >
-      <Avatar className='h-10 w-10 shrink-0'>
+      <Avatar className='mt-0.5 h-10 w-10 shrink-0'>
         <AvatarImage src={conv.user.avatar ?? undefined} />
         <AvatarFallback>{initials(conv.user.name)}</AvatarFallback>
       </Avatar>
       <div className='min-w-0 flex-1 overflow-hidden'>
-        <div className='flex items-center justify-between gap-1'>
-          <span className='truncate text-sm font-medium'>{conv.user.name}</span>
-          {conv.last_message_at && (
-            <span className='ml-1 shrink-0 text-xs text-muted-foreground'>
-              {compactTime(conv.last_message_at)}
-            </span>
-          )}
-        </div>
+        <p className='truncate text-sm font-medium'>{conv.user.name}</p>
         {last && (
           <p className='truncate text-xs text-muted-foreground'>
             {isFromAdmin ? 'You: ' : ''}
@@ -96,6 +89,11 @@ function ConversationItem({
           </p>
         )}
       </div>
+      {conv.last_message_at && (
+        <span className='mt-0.5 shrink-0 text-xs text-muted-foreground'>
+          {compactTime(conv.last_message_at)}
+        </span>
+      )}
     </button>
   )
 }
@@ -212,7 +210,7 @@ export function Chat() {
 
       <div data-layout='fixed' className='flex h-[calc(100svh-4rem)] overflow-hidden'>
         {/* Sidebar — full-width on mobile when no chat open, fixed width on desktop */}
-        <div className={`flex flex-col overflow-hidden border-r ${selectedId ? 'hidden md:flex md:w-80 md:shrink-0' : 'w-full md:w-80 md:shrink-0'}`}>
+        <div className={`flex flex-col border-r ${selectedId ? 'hidden md:flex md:w-80 md:shrink-0' : 'w-full md:w-80 md:shrink-0'}`}>
           <div className='space-y-2 p-4'>
             <h2 className='text-lg font-semibold'>Support Chat</h2>
             <div className='relative'>
