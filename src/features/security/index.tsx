@@ -148,6 +148,7 @@ export function Security() {
       </Header>
 
       <Main>
+      <div className='space-y-6'>
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           <Shield className='h-6 w-6' />
@@ -390,6 +391,7 @@ export function Security() {
           </button>
         </div>
       )}
+      </div>
       </Main>
     </>
   )
