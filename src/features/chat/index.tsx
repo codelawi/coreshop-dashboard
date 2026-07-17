@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import {
   ArrowLeft,
+  ImageIcon,
   MessageSquarePlus,
   MessagesSquare,
   Search,
@@ -177,16 +178,27 @@ function MessageBubble({ msg, adminId }: { msg: SupportMessage; adminId: number 
         </Avatar>
       )}
       <div className={cn('flex max-w-[68%] flex-col gap-1', isMe ? 'items-end' : 'items-start')}>
-        <div
-          className={cn(
-            'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
-            isMe
-              ? 'rounded-tr-sm bg-primary text-primary-foreground'
-              : 'rounded-tl-sm bg-muted text-foreground'
-          )}
-        >
-          {msg.body}
-        </div>
+        {msg.type === 'image' ? (
+          <a href={msg.body} target='_blank' rel='noreferrer'>
+            <img
+              src={msg.body}
+              alt='image'
+              className='max-w-[220px] rounded-2xl object-cover'
+              style={{ maxHeight: 220 }}
+            />
+          </a>
+        ) : (
+          <div
+            className={cn(
+              'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+              isMe
+                ? 'rounded-tr-sm bg-primary text-primary-foreground'
+                : 'rounded-tl-sm bg-muted text-foreground'
+            )}
+          >
+            {msg.body}
+          </div>
+        )}
         <span className='px-1 text-[11px] text-muted-foreground'>
           {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
         </span>
@@ -232,7 +244,7 @@ export function Chat() {
     const text = body.trim()
     if (!text || sendMessage.isPending || !selectedId) { return }
     setBody('')
-    sendMessage.mutate(text)
+    sendMessage.mutate({ body: text })
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -240,6 +252,13 @@ export function Chat() {
       e.preventDefault()
       handleSend()
     }
+  }
+
+  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !selectedId) { return }
+    sendMessage.mutate({ imageFile: file })
+    e.target.value = ''
   }
 
   function handleStartChat(userId: number) {
@@ -373,6 +392,16 @@ export function Chat() {
             {/* Input bar */}
             <div className='shrink-0 border-t bg-background px-4 py-3'>
               <div className='flex items-center gap-2 rounded-xl border bg-muted/40 px-3 py-1.5 focus-within:border-ring focus-within:ring-1 focus-within:ring-ring'>
+                <label className='shrink-0 cursor-pointer text-muted-foreground hover:text-foreground'>
+                  <ImageIcon className='h-4 w-4' />
+                  <input
+                    type='file'
+                    accept='image/jpeg,image/png,image/webp'
+                    className='hidden'
+                    onChange={handleImageUpload}
+                    disabled={sendMessage.isPending || !selectedId}
+                  />
+                </label>
                 <Input
                   placeholder='Type a message…'
                   value={body}

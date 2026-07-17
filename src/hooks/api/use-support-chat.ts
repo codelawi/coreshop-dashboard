@@ -32,6 +32,7 @@ export interface SupportMessage {
   sender_name: string
   sender_avatar: string | null
   sender_role: string
+  type: 'text' | 'image'
   body: string
   read_at: string | null
   created_at: string
@@ -74,8 +75,20 @@ export function useSupportMessages(conversationId: number | null) {
 export function useSendSupportMessage(conversationId: number | null) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (body: string) => {
-      const res = await api.post(`/admin/support/${conversationId}/messages`, { body })
+    mutationFn: async (payload: { body?: string; imageFile?: File }) => {
+      let data: FormData | { body: string }
+
+      if (payload.imageFile) {
+        const form = new FormData()
+        form.append('image', payload.imageFile)
+        data = form
+      } else {
+        data = { body: payload.body ?? '' }
+      }
+
+      const res = await api.post(`/admin/support/${conversationId}/messages`, data, {
+        headers: payload.imageFile ? { 'Content-Type': 'multipart/form-data' } : undefined,
+      })
       return res.data.data as SupportMessage
     },
     onSuccess: () => {
