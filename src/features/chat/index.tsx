@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
 import {
   ArrowLeft,
@@ -227,6 +228,7 @@ function MessageBubble({ msg, adminId }: { msg: SupportMessage; adminId: number 
 export function Chat() {
   const { user } = useAuthStore()
   const adminId = user?.id
+  const qc = useQueryClient()
 
   const { data: conversations = [], isLoading: loadingConvs } = useSupportConversations()
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -238,6 +240,15 @@ export function Chat() {
   const sendMessage = useSendSupportMessage(selectedId)
   const startConversation = useOrStartSupportConversation()
   useSupportChannel(selectedId)
+
+  function selectConversation(id: number) {
+    setSelectedId(id)
+    // Optimistically zero out the unread count; the backend marks them read
+    // when useSupportMessages fetches, and the next poll re-syncs the true value
+    qc.setQueryData<SupportConversation[]>(['support-conversations'], (prev) =>
+      prev?.map((c) => (c.id === id ? { ...c, unread_count: 0 } : c))
+    )
+  }
 
   const markAllRead = useMarkAllNotificationsRead()
   useEffect(() => {
@@ -278,7 +289,7 @@ export function Chat() {
 
   function handleStartChat(userId: number) {
     startConversation.mutate(userId, {
-      onSuccess: (conv) => setSelectedId(conv.id),
+      onSuccess: (conv) => selectConversation(conv.id),
     })
   }
 
@@ -352,7 +363,7 @@ export function Chat() {
                   conv={conv}
                   selected={conv.id === selectedId}
                   adminId={adminId}
-                  onClick={() => setSelectedId(conv.id)}
+                  onClick={() => selectConversation(conv.id)}
                 />
               ))
             )}
