@@ -149,7 +149,7 @@ function ConversationItem({
         {last ? (
           <p className='mt-0.5 truncate text-xs text-muted-foreground'>
             {isFromAdmin ? <span className='text-foreground/60'>You: </span> : null}
-            {last.body}
+            {/^https?:\/\/.+\/chat\//i.test(last.body) ? '📷 Photo' : last.body}
           </p>
         ) : (
           <p className='mt-0.5 text-xs text-muted-foreground'>No messages yet</p>
@@ -166,8 +166,13 @@ function ConversationItem({
 
 /* ─── message bubble ──────────────────────────────────────── */
 
+function isImageMessage(msg: SupportMessage): boolean {
+  return msg.type === 'image' || /^https?:\/\/.+\/chat\//i.test(msg.body ?? '')
+}
+
 function MessageBubble({ msg, adminId }: { msg: SupportMessage; adminId: number | undefined }) {
   const isMe = msg.sender_id === adminId
+  const isImage = isImageMessage(msg)
 
   return (
     <div className={cn('mb-4 flex gap-2', isMe ? 'flex-row-reverse' : 'flex-row')}>
@@ -178,12 +183,12 @@ function MessageBubble({ msg, adminId }: { msg: SupportMessage; adminId: number 
         </Avatar>
       )}
       <div className={cn('flex max-w-[68%] flex-col gap-1', isMe ? 'items-end' : 'items-start')}>
-        {msg.type === 'image' ? (
+        {isImage ? (
           <a href={msg.body} target='_blank' rel='noreferrer'>
             <img
               src={msg.body}
               alt='image'
-              className='max-w-[220px] rounded-2xl object-cover'
+              className='max-w-55 rounded-2xl object-cover'
               style={{ maxHeight: 220 }}
             />
           </a>

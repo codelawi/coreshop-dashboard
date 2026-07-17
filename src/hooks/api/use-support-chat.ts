@@ -86,9 +86,7 @@ export function useSendSupportMessage(conversationId: number | null) {
         data = { body: payload.body ?? '' }
       }
 
-      const res = await api.post(`/admin/support/${conversationId}/messages`, data, {
-        headers: payload.imageFile ? { 'Content-Type': 'multipart/form-data' } : undefined,
-      })
+      const res = await api.post(`/admin/support/${conversationId}/messages`, data)
       return res.data.data as SupportMessage
     },
     onSuccess: () => {
