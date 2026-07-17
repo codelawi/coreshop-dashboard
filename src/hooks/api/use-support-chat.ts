@@ -22,6 +22,7 @@ export interface SupportConversation {
   user: SupportUser
   last_message: SupportLastMessage | null
   last_message_at: string | null
+  unread_count: number
   created_at: string
 }
 
@@ -61,6 +62,7 @@ export function useOrStartSupportConversation() {
 }
 
 export function useSupportMessages(conversationId: number | null) {
+  const qc = useQueryClient()
   return useQuery({
     queryKey: ['support-messages', conversationId],
     queryFn: async () => {
@@ -69,6 +71,14 @@ export function useSupportMessages(conversationId: number | null) {
     },
     enabled: !!conversationId,
     refetchInterval: 4000,
+    select: (data) => {
+      // Clear unread count in conversations list when messages are fetched
+      // (backend marks them read on this same request)
+      qc.setQueryData<SupportConversation[]>(['support-conversations'], (prev) =>
+        prev?.map((c) => c.id === conversationId ? { ...c, unread_count: 0 } : c)
+      )
+      return data
+    },
   })
 }
 

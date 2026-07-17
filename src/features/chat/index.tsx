@@ -131,6 +131,7 @@ function ConversationItem({
 }) {
   const last = conv.last_message
   const isFromAdmin = last?.sender_id === adminId
+  const hasUnread = conv.unread_count > 0
 
   return (
     <button
@@ -145,9 +146,11 @@ function ConversationItem({
         <AvatarFallback className='text-sm'>{initials(conv.user.name)}</AvatarFallback>
       </Avatar>
       <div className='min-w-0 flex-1 overflow-hidden'>
-        <p className='truncate text-sm font-semibold leading-tight'>{conv.user.name}</p>
+        <p className={cn('truncate text-sm leading-tight', hasUnread ? 'font-bold' : 'font-semibold')}>
+          {conv.user.name}
+        </p>
         {last ? (
-          <p className='mt-0.5 truncate text-xs text-muted-foreground'>
+          <p className={cn('mt-0.5 truncate text-xs', hasUnread ? 'font-medium text-foreground' : 'text-muted-foreground')}>
             {isFromAdmin ? <span className='text-foreground/60'>You: </span> : null}
             {/^https?:\/\/.+\/chat\//i.test(last.body) ? '📷 Photo' : last.body}
           </p>
@@ -155,11 +158,18 @@ function ConversationItem({
           <p className='mt-0.5 text-xs text-muted-foreground'>No messages yet</p>
         )}
       </div>
-      {conv.last_message_at && (
-        <span className='mt-0.5 shrink-0 text-[11px] text-muted-foreground'>
-          {compactTime(conv.last_message_at)}
-        </span>
-      )}
+      <div className='flex shrink-0 flex-col items-end gap-1.5'>
+        {conv.last_message_at && (
+          <span className={cn('text-[11px]', hasUnread ? 'text-primary font-medium' : 'text-muted-foreground')}>
+            {compactTime(conv.last_message_at)}
+          </span>
+        )}
+        {hasUnread && (
+          <span className='flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground'>
+            {conv.unread_count > 99 ? '99+' : conv.unread_count}
+          </span>
+        )}
+      </div>
     </button>
   )
 }
