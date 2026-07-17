@@ -1,7 +1,8 @@
-import { Loader2, ShoppingBag } from 'lucide-react'
+import { CheckCircle, Loader2, ShoppingBag } from 'lucide-react'
 import { toast } from 'sonner'
-import { useOrder, useUpdateOrderStatus } from '@/hooks/api/use-orders'
+import { useOrder, useUpdateOrderStatus, useUpdatePaymentStatus } from '@/hooks/api/use-orders'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import {
   Select,
@@ -74,6 +75,7 @@ export function OrderDetailSheet({
 }: OrderDetailSheetProps) {
   const { data, isLoading } = useOrder(open ? orderId : 0)
   const updateStatus = useUpdateOrderStatus()
+  const updatePaymentStatus = useUpdatePaymentStatus()
   const order = data?.data
 
   const handleStatusChange = (status: string) => {
@@ -82,6 +84,16 @@ export function OrderDetailSheet({
       {
         onSuccess: () => toast.success(`Order status updated to ${statusLabel[status as OrderStatus]}.`),
         onError: () => toast.error('Failed to update order status.'),
+      }
+    )
+  }
+
+  const handleApprovePayment = () => {
+    updatePaymentStatus.mutate(
+      { id: orderId, payment_status: 'paid' },
+      {
+        onSuccess: () => toast.success('CliQ payment approved. Client has been notified.'),
+        onError: () => toast.error('Failed to approve payment.'),
       }
     )
   }
@@ -259,6 +271,36 @@ export function OrderDetailSheet({
               )}
             </div>
 
+            {/* CliQ payment approval */}
+            {order.payment_method === 'cliq' && order.payment_status === 'unpaid' && (
+              <div className='rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950'>
+                <p className='mb-1 text-sm font-semibold text-amber-800 dark:text-amber-300'>
+                  CliQ Payment Pending Verification
+                </p>
+                <p className='mb-3 text-xs text-amber-700 dark:text-amber-400'>
+                  Check your bank for a CliQ transfer from this customer, then approve.
+                </p>
+                {order.cliq_reference && (
+                  <p className='mb-3 text-xs text-amber-700 dark:text-amber-400'>
+                    Reference: <span className='font-mono font-semibold'>{order.cliq_reference}</span>
+                  </p>
+                )}
+                <Button
+                  size='sm'
+                  className='gap-2 bg-green-600 hover:bg-green-700 text-white'
+                  onClick={handleApprovePayment}
+                  disabled={updatePaymentStatus.isPending}
+                >
+                  {updatePaymentStatus.isPending ? (
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                  ) : (
+                    <CheckCircle className='h-4 w-4' />
+                  )}
+                  Approve Payment
+                </Button>
+              </div>
+            )}
+
             {/* Payment & Notes */}
             <div className='grid grid-cols-2 gap-3 text-sm'>
               <div>
@@ -269,8 +311,16 @@ export function OrderDetailSheet({
               </div>
               <div>
                 <p className='text-xs text-muted-foreground'>Payment Status</p>
-                <p className='font-medium capitalize'>{order.payment_status}</p>
+                <p className={`font-medium capitalize ${order.payment_status === 'paid' ? 'text-green-600' : order.payment_status === 'unpaid' ? 'text-amber-600' : ''}`}>
+                  {order.payment_status}
+                </p>
               </div>
+              {order.cliq_reference && (
+                <div>
+                  <p className='text-xs text-muted-foreground'>CliQ Reference</p>
+                  <p className='font-mono font-medium'>{order.cliq_reference}</p>
+                </div>
+              )}
               {order.coupon && (
                 <div>
                   <p className='text-xs text-muted-foreground'>Coupon</p>

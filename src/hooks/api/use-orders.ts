@@ -33,3 +33,16 @@ export function useUpdateOrderStatus() {
     },
   })
 }
+
+export function useUpdatePaymentStatus() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, payment_status }: { id: number; payment_status: string }) => {
+      const response = await api.patch(`/orders/${id}/payment-status`, { payment_status })
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+    },
+  })
+}
