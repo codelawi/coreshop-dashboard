@@ -263,32 +263,42 @@ export function Chat() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const bottomRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const prevScrollHeightRef = useRef<number>(0)
-  const isPrependingRef = useRef(false)
+  const prependAnchorRef = useRef<number | null>(null)
+  const wasNearBottomRef = useRef(true)
+  const pageCount = messagesData?.pages.length ?? 0
 
-  // Scroll to bottom on initial load and when new messages arrive (but not when prepending older)
+  // Restore scroll position synchronously before paint when older messages are prepended
+  useLayoutEffect(() => {
+    if (prependAnchorRef.current !== null && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop +=
+        scrollContainerRef.current.scrollHeight - prependAnchorRef.current
+      prependAnchorRef.current = null
+    }
+  }, [pageCount])
+
+  // Scroll to bottom only when the user was already near the bottom
   useEffect(() => {
-    if (!isPrependingRef.current) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (wasNearBottomRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight
     }
   }, [messages])
 
-  // After older messages are prepended, restore scroll position so the view doesn't jump
-  useLayoutEffect(() => {
-    if (isPrependingRef.current && scrollContainerRef.current) {
-      const newScrollHeight = scrollContainerRef.current.scrollHeight
-      scrollContainerRef.current.scrollTop = newScrollHeight - prevScrollHeightRef.current
-      isPrependingRef.current = false
-    }
-  })
+  // Reset to bottom whenever the active conversation changes
+  useEffect(() => {
+    wasNearBottomRef.current = true
+  }, [selectedId])
 
   function handleMessagesScroll(e: React.UIEvent<HTMLDivElement>) {
     const el = e.currentTarget
-    if (el.scrollTop < 80 && hasPreviousPage && !isFetchingPreviousPage) {
-      prevScrollHeightRef.current = el.scrollHeight
-      isPrependingRef.current = true
+    wasNearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120
+    if (
+      el.scrollTop < 120 &&
+      hasPreviousPage &&
+      !isFetchingPreviousPage &&
+      prependAnchorRef.current === null
+    ) {
+      prependAnchorRef.current = el.scrollHeight
       fetchPreviousPage()
     }
   }
@@ -302,6 +312,7 @@ export function Chat() {
     const text = body.trim()
     if (!text || sendMessage.isPending || !selectedId) { return }
     setBody('')
+    wasNearBottomRef.current = true
     sendMessage.mutate({ body: text })
   }
 
@@ -315,6 +326,7 @@ export function Chat() {
   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file || !selectedId) { return }
+    wasNearBottomRef.current = true
     sendMessage.mutate({ imageFile: file })
     e.target.value = ''
   }
@@ -433,11 +445,6 @@ export function Chat() {
               onScroll={handleMessagesScroll}
             >
               <div className='px-4 py-4'>
-                {isFetchingPreviousPage && (
-                  <div className='pb-3 text-center text-xs text-muted-foreground'>
-                    Loading older messages…
-                  </div>
-                )}
                 {loadingMsgs ? (
                   <div className='flex h-40 items-center justify-center text-sm text-muted-foreground'>
                     Loading messages…
@@ -452,7 +459,6 @@ export function Chat() {
                     <MessageBubble key={msg.id} msg={msg} adminId={adminId} />
                   ))
                 )}
-                <div ref={bottomRef} />
               </div>
             </div>
 
