@@ -79,6 +79,7 @@ export function useSupportMessages(conversationId: number | null) {
       return res.data as SupportMessagesPage
     },
     initialPageParam: undefined as number | undefined,
+    getNextPageParam: () => undefined,
     getPreviousPageParam: (firstPage) => {
       if (!firstPage.meta.has_more || firstPage.data.length === 0) { return undefined }
       return firstPage.data[0].id
