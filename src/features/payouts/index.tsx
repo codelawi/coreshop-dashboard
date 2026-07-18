@@ -30,8 +30,20 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
+function compact(n: number): string {
+  if (n >= 1_000_000) {
+    const v = n / 1_000_000
+    return `JOD ${v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)}M`
+  }
+  if (n >= 1_000) {
+    const v = n / 1_000
+    return `JOD ${v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)}K`
+  }
+  return `JOD ${n.toFixed(2)}`
+}
+
 function fmt(v: number) {
-  return `JOD ${v.toFixed(2)}`
+  return `JOD ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v)}`
 }
 
 export function Payouts() {
@@ -84,10 +96,11 @@ export function Payouts() {
               <TrendingUp className='h-4 w-4 text-muted-foreground' />
             </CardHeader>
             <CardContent>
-              <p className='text-2xl font-bold'>{fmt(totalRevenue)}</p>
-              <p className='mt-1 text-xs text-muted-foreground'>
-                Gross merchandise value
-              </p>
+              <p className='text-2xl font-bold tracking-tight'>{compact(totalRevenue)}</p>
+              {compact(totalRevenue) !== fmt(totalRevenue) && (
+                <p className='text-xs text-muted-foreground'>{fmt(totalRevenue)}</p>
+              )}
+              <p className='mt-1 text-xs text-muted-foreground'>Gross merchandise value</p>
             </CardContent>
           </Card>
           <Card className='border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950'>
@@ -98,10 +111,11 @@ export function Payouts() {
               <BadgeDollarSign className='h-4 w-4 text-green-600 dark:text-green-400' />
             </CardHeader>
             <CardContent>
-              <p className='text-2xl font-bold text-green-700 dark:text-green-300'>{fmt(totalFees)}</p>
-              <p className='mt-1 text-xs text-green-600 dark:text-green-500'>
-                Commission retained by platform
-              </p>
+              <p className='text-2xl font-bold tracking-tight text-green-700 dark:text-green-300'>{compact(totalFees)}</p>
+              {compact(totalFees) !== fmt(totalFees) && (
+                <p className='text-xs text-green-600 dark:text-green-500'>{fmt(totalFees)}</p>
+              )}
+              <p className='mt-1 text-xs text-green-600 dark:text-green-500'>Commission retained by platform</p>
             </CardContent>
           </Card>
           <Card>
@@ -112,10 +126,11 @@ export function Payouts() {
               <Clock className='h-4 w-4 text-muted-foreground' />
             </CardHeader>
             <CardContent>
-              <p className='text-2xl font-bold'>{fmt(totalPayouts)}</p>
-              <p className='mt-1 text-xs text-muted-foreground'>
-                Amount owed to sellers
-              </p>
+              <p className='text-2xl font-bold tracking-tight'>{compact(totalPayouts)}</p>
+              {compact(totalPayouts) !== fmt(totalPayouts) && (
+                <p className='text-xs text-muted-foreground'>{fmt(totalPayouts)}</p>
+              )}
+              <p className='mt-1 text-xs text-muted-foreground'>Amount owed to sellers</p>
             </CardContent>
           </Card>
           <Card className='border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950'>
@@ -126,10 +141,11 @@ export function Payouts() {
               <CircleDollarSign className='h-4 w-4 text-emerald-600 dark:text-emerald-400' />
             </CardHeader>
             <CardContent>
-              <p className='text-2xl font-bold text-emerald-700 dark:text-emerald-300'>{fmt(totalFees)}</p>
-              <p className='mt-1 text-xs text-emerald-600 dark:text-emerald-500'>
-                Net platform earnings
-              </p>
+              <p className='text-2xl font-bold tracking-tight text-emerald-700 dark:text-emerald-300'>{compact(totalFees)}</p>
+              {compact(totalFees) !== fmt(totalFees) && (
+                <p className='text-xs text-emerald-600 dark:text-emerald-500'>{fmt(totalFees)}</p>
+              )}
+              <p className='mt-1 text-xs text-emerald-600 dark:text-emerald-500'>Net platform earnings</p>
             </CardContent>
           </Card>
         </div>
