@@ -1,5 +1,11 @@
 import { useEffect, useRef } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  type InfiniteData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 import api from '@/lib/axios'
 import echo from '@/lib/echo'
 
@@ -39,6 +45,8 @@ export interface SupportMessage {
   created_at: string
 }
 
+type SupportMessagesPage = { data: SupportMessage[]; meta: { has_more: boolean } }
+
 export function useSupportConversations() {
   return useQuery({
     queryKey: ['support-conversations'],
@@ -62,14 +70,20 @@ export function useOrStartSupportConversation() {
 }
 
 export function useSupportMessages(conversationId: number | null) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['support-messages', conversationId],
-    queryFn: async () => {
-      const res = await api.get(`/admin/support/${conversationId}/messages`)
-      return res.data.data as SupportMessage[]
+    queryFn: async ({ pageParam }: { pageParam: number | undefined }) => {
+      const params: Record<string, unknown> = { limit: 10 }
+      if (pageParam) { params.before_id = pageParam }
+      const res = await api.get(`/admin/support/${conversationId}/messages`, { params })
+      return res.data as SupportMessagesPage
+    },
+    initialPageParam: undefined as number | undefined,
+    getPreviousPageParam: (firstPage) => {
+      if (!firstPage.meta.has_more || firstPage.data.length === 0) { return undefined }
+      return firstPage.data[0].id
     },
     enabled: !!conversationId,
-    refetchInterval: 4000,
   })
 }
 
@@ -108,11 +122,19 @@ export function useSupportChannel(conversationId: number | null) {
     channelRef.current = channel
 
     channel.listen('.SupportMessageSent', (data: SupportMessage) => {
-      qc.setQueryData<SupportMessage[]>(
+      qc.setQueryData<InfiniteData<SupportMessagesPage>>(
         ['support-messages', conversationId],
-        (prev = []) => {
-          if (prev.some((m) => m.id === data.id)) return prev
-          return [...prev, data]
+        (prev) => {
+          if (!prev) { return prev }
+          const lastIdx = prev.pages.length - 1
+          const lastPage = prev.pages[lastIdx]
+          if (lastPage.data.some((m) => m.id === data.id)) { return prev }
+          return {
+            ...prev,
+            pages: prev.pages.map((page, i) =>
+              i === lastIdx ? { ...page, data: [...page.data, data] } : page
+            ),
+          }
         },
       )
       qc.invalidateQueries({ queryKey: ['support-conversations'] })

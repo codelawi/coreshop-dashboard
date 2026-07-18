@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
 import {
@@ -31,7 +31,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Header } from '@/components/layout/header'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { cn } from '@/lib/utils'
@@ -236,7 +235,15 @@ export function Chat() {
   const [body, setBody] = useState('')
   const [newChatOpen, setNewChatOpen] = useState(false)
 
-  const { data: messages = [], isLoading: loadingMsgs } = useSupportMessages(selectedId)
+  const {
+    data: messagesData,
+    isLoading: loadingMsgs,
+    hasPreviousPage,
+    isFetchingPreviousPage,
+    fetchPreviousPage,
+  } = useSupportMessages(selectedId)
+
+  const messages = messagesData?.pages.flatMap((p) => p.data) ?? []
   const sendMessage = useSendSupportMessage(selectedId)
   const startConversation = useOrStartSupportConversation()
   useSupportChannel(selectedId)
@@ -257,9 +264,34 @@ export function Chat() {
   }, [])
 
   const bottomRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const prevScrollHeightRef = useRef<number>(0)
+  const isPrependingRef = useRef(false)
+
+  // Scroll to bottom on initial load and when new messages arrive (but not when prepending older)
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (!isPrependingRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [messages])
+
+  // After older messages are prepended, restore scroll position so the view doesn't jump
+  useLayoutEffect(() => {
+    if (isPrependingRef.current && scrollContainerRef.current) {
+      const newScrollHeight = scrollContainerRef.current.scrollHeight
+      scrollContainerRef.current.scrollTop = newScrollHeight - prevScrollHeightRef.current
+      isPrependingRef.current = false
+    }
+  })
+
+  function handleMessagesScroll(e: React.UIEvent<HTMLDivElement>) {
+    const el = e.currentTarget
+    if (el.scrollTop < 80 && hasPreviousPage && !isFetchingPreviousPage) {
+      prevScrollHeightRef.current = el.scrollHeight
+      isPrependingRef.current = true
+      fetchPreviousPage()
+    }
+  }
 
   const selectedConv = conversations.find((c) => c.id === selectedId)
   const filtered = conversations.filter((c) =>
@@ -395,8 +427,17 @@ export function Chat() {
             </div>
 
             {/* Messages */}
-            <ScrollArea className='min-h-0 flex-1'>
+            <div
+              ref={scrollContainerRef}
+              className='min-h-0 flex-1 overflow-y-auto'
+              onScroll={handleMessagesScroll}
+            >
               <div className='px-4 py-4'>
+                {isFetchingPreviousPage && (
+                  <div className='pb-3 text-center text-xs text-muted-foreground'>
+                    Loading older messages…
+                  </div>
+                )}
                 {loadingMsgs ? (
                   <div className='flex h-40 items-center justify-center text-sm text-muted-foreground'>
                     Loading messages…
@@ -413,7 +454,7 @@ export function Chat() {
                 )}
                 <div ref={bottomRef} />
               </div>
-            </ScrollArea>
+            </div>
 
             {/* Input bar */}
             <div className='shrink-0 border-t bg-background px-4 py-3'>
