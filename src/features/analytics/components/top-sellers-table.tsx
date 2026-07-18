@@ -16,6 +16,14 @@ interface Seller {
   orders: number
 }
 
+function fmtCurrency(n: number): string {
+  return `JOD ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}`
+}
+
+function fmtCount(n: number): string {
+  return new Intl.NumberFormat('en-US').format(n)
+}
+
 export function TopSellersTable() {
   const { data, isLoading } = useAnalyticsTopSellers()
   const sellers: Seller[] = data?.data ?? []
@@ -57,10 +65,10 @@ export function TopSellersTable() {
                 </div>
                 <div className='flex items-center gap-4 text-sm'>
                   <span className='text-muted-foreground'>
-                    {seller.orders} orders
+                    {fmtCount(seller.orders)} orders
                   </span>
                   <span className='font-medium'>
-                    JOD {Number(seller.revenue).toFixed(2)}
+                    {fmtCurrency(Number(seller.revenue))}
                   </span>
                 </div>
               </div>

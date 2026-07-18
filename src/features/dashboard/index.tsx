@@ -24,13 +24,26 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { Overview } from './components/overview'
 import { RecentSales } from './components/recent-sales'
 
+function compact(n: number): string {
+  if (n >= 1_000_000) {
+    const v = n / 1_000_000
+    return `${v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)}M`
+  }
+  if (n >= 1_000) {
+    const v = n / 1_000
+    return `${v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)}K`
+  }
+  return new Intl.NumberFormat('en-US').format(n)
+}
+
 function formatCurrency(value: number | null | undefined) {
   const n = Number(value ?? 0)
-  return `JOD ${n.toFixed(2)}`
+  return { short: `JOD ${compact(n)}`, full: `JOD ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}` }
 }
 
 function formatNumber(value: number | null | undefined) {
-  return new Intl.NumberFormat('en-US').format(Number(value ?? 0))
+  const n = Number(value ?? 0)
+  return { short: compact(n), full: new Intl.NumberFormat('en-US').format(n) }
 }
 
 export function Dashboard() {
@@ -38,36 +51,12 @@ export function Dashboard() {
   const overview = data?.data
 
   const kpis = [
-    {
-      title: 'Total Revenue',
-      value: formatCurrency(overview?.total_revenue),
-      icon: DollarSign,
-    },
-    {
-      title: 'Total Orders',
-      value: formatNumber(overview?.total_orders),
-      icon: ShoppingCart,
-    },
-    {
-      title: 'Active Users',
-      value: formatNumber(overview?.total_users),
-      icon: Users,
-    },
-    {
-      title: 'Active Products',
-      value: formatNumber(overview?.total_products),
-      icon: Package,
-    },
-    {
-      title: 'Avg. Order Value',
-      value: formatCurrency(overview?.avg_order_value),
-      icon: TrendingUp,
-    },
-    {
-      title: 'Pending Orders',
-      value: formatNumber(overview?.pending_orders),
-      icon: Clock,
-    },
+    { title: 'Total Revenue',    ...formatCurrency(overview?.total_revenue),  icon: DollarSign },
+    { title: 'Total Orders',     ...formatNumber(overview?.total_orders),      icon: ShoppingCart },
+    { title: 'Active Users',     ...formatNumber(overview?.total_users),       icon: Users },
+    { title: 'Active Products',  ...formatNumber(overview?.total_products),    icon: Package },
+    { title: 'Avg. Order Value', ...formatCurrency(overview?.avg_order_value), icon: TrendingUp },
+    { title: 'Pending Orders',   ...formatNumber(overview?.pending_orders),    icon: Clock },
   ]
 
   return (
@@ -99,13 +88,16 @@ export function Dashboard() {
                   <kpi.icon className='h-4 w-4 text-muted-foreground' />
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold'>
-                    {isLoading ? (
-                      <Loader2 className='h-5 w-5 animate-spin text-muted-foreground' />
-                    ) : (
-                      kpi.value
-                    )}
-                  </div>
+                  {isLoading ? (
+                    <Loader2 className='h-5 w-5 animate-spin text-muted-foreground' />
+                  ) : (
+                    <>
+                      <div className='text-2xl font-bold tracking-tight'>{kpi.short}</div>
+                      {kpi.short !== kpi.full && (
+                        <p className='mt-0.5 text-xs text-muted-foreground'>{kpi.full}</p>
+                      )}
+                    </>
+                  )}
                 </CardContent>
               </Card>
             ))}
