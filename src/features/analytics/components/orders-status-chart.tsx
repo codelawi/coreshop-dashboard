@@ -17,19 +17,33 @@ import {
 } from '@/components/ui/card'
 
 const STATUS_COLORS: Record<string, string> = {
-  delivered: '#22c55e',
-  processing: '#3b82f6',
-  shipped: '#a855f7',
-  pending: '#eab308',
-  cancelled: '#ef4444',
+  pending:           '#eab308',
+  approved:          '#3b82f6',
+  preparing:         '#f97316',
+  ready_for_pickup:  '#06b6d4',
+  assigned:          '#6366f1',
+  out_for_delivery:  '#a855f7',
+  delivered:         '#22c55e',
+  completed:         '#10b981',
+  cancelled:         '#ef4444',
+  refunded:          '#f43f5e',
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  delivered: 'Delivered',
-  processing: 'Processing',
-  shipped: 'Shipped',
-  pending: 'Pending',
-  cancelled: 'Cancelled',
+  pending:           'Pending',
+  approved:          'Approved',
+  preparing:         'Preparing',
+  ready_for_pickup:  'Ready for Pickup',
+  assigned:          'Assigned',
+  out_for_delivery:  'Out for Delivery',
+  delivered:         'Delivered',
+  completed:         'Completed',
+  cancelled:         'Cancelled',
+  refunded:          'Refunded',
+}
+
+function formatStatus(status: string): string {
+  return STATUS_LABELS[status] ?? status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 interface StatusPoint {
@@ -42,7 +56,7 @@ export function OrdersStatusChart() {
   const byStatus: StatusPoint[] = data?.data?.by_status ?? []
 
   const chartData = byStatus.map((p) => ({
-    name: STATUS_LABELS[p.status] ?? p.status,
+    name: formatStatus(p.status),
     value: Number(p.total),
     status: p.status,
   }))
