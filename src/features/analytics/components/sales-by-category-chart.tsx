@@ -81,11 +81,11 @@ export function SalesByCategoryChart() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className='flex h-[300px] items-center justify-center'>
+          <div className='flex h-75 items-center justify-center'>
             <Loader2 className='h-6 w-6 animate-spin text-muted-foreground' />
           </div>
         ) : chartData.length === 0 ? (
-          <div className='flex h-[300px] items-center justify-center'>
+          <div className='flex h-75 items-center justify-center'>
             <p className='text-sm text-muted-foreground'>No sales data yet.</p>
           </div>
         ) : (
@@ -127,9 +127,9 @@ export function SalesByCategoryChart() {
                   borderRadius: '8px',
                   fontSize: '12px',
                 }}
-                formatter={(value: number, _name: string, props: any) => [
-                  `JOD ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · ${props.payload.orders} orders`,
-                  props.payload.fullName,
+                formatter={(value, _name, props) => [
+                  `JOD ${Number(value ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · ${(props as any).payload.orders} orders`,
+                  (props as any).payload.fullName,
                 ]}
               />
               <Bar dataKey='revenue' radius={[0, 6, 6, 0]} label={<BarLabel />}>

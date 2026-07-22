@@ -111,8 +111,8 @@ export function PlatformEarningsChart() {
                   borderRadius: '8px',
                   fontSize: '12px',
                 }}
-                formatter={(v: number) => [
-                  `JOD ${v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                formatter={(v) => [
+                  `JOD ${Number(v ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                 ]}
               />
               <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }} />

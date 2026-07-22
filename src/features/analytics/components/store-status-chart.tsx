@@ -83,7 +83,7 @@ export function StoreStatusChart() {
                       borderRadius: '8px',
                       fontSize: '12px',
                     }}
-                    formatter={(v: number, n: string) => [v, n]}
+                    formatter={(v, n) => [v, n]}
                   />
                 </RadialBarChart>
               </ResponsiveContainer>
