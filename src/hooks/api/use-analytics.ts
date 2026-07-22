@@ -60,3 +60,43 @@ export function useAnalyticsTopSellers() {
     },
   })
 }
+
+export function useAnalyticsCategories() {
+  return useQuery({
+    queryKey: ['analytics', 'categories'],
+    queryFn: async () => {
+      const response = await api.get('/analytics/categories')
+      return response.data
+    },
+  })
+}
+
+export function useAnalyticsEarnings() {
+  return useQuery({
+    queryKey: ['analytics', 'earnings'],
+    queryFn: async () => {
+      const response = await api.get('/analytics/earnings')
+      return response.data
+    },
+  })
+}
+
+export function useAnalyticsStoreStats() {
+  return useQuery({
+    queryKey: ['analytics', 'store-stats'],
+    queryFn: async () => {
+      const response = await api.get('/analytics/store-stats')
+      return response.data
+    },
+  })
+}
+
+export function useAnalyticsCities() {
+  return useQuery({
+    queryKey: ['analytics', 'cities'],
+    queryFn: async () => {
+      const response = await api.get('/analytics/cities')
+      return response.data
+    },
+  })
+}
