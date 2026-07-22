@@ -16,6 +16,7 @@ import {
   Shield,
   MessageSquare,
   ScrollText,
+  Flag,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -130,6 +131,11 @@ export const sidebarData: SidebarData = {
           title: 'Support Chat',
           url: '/chat',
           icon: MessageSquare,
+        },
+        {
+          title: 'Reports',
+          url: '/reports',
+          icon: Flag,
         },
         {
           title: 'Security',

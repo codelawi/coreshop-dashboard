@@ -3,7 +3,7 @@ import api from '@/lib/axios'
 
 export interface DashboardNotification {
   id: number
-  type: 'new_order' | 'new_product' | 'new_user' | 'new_support_message'
+  type: 'new_order' | 'new_product' | 'new_user' | 'new_support_message' | 'new_feedback'
   title: string
   body: string
   data: Record<string, unknown> | null

@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { Bell, CheckCheck, MessageSquare, Package, ShoppingBag, UserPlus } from 'lucide-react'
+import { Bell, CheckCheck, Flag, MessageSquare, Package, ShoppingBag, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import echo from '@/lib/echo'
@@ -24,12 +24,14 @@ const NOTIFICATION_ROUTE: Record<DashboardNotification['type'], string> = {
   new_product: '/products',
   new_user: '/users',
   new_support_message: '/chat',
+  new_feedback: '/reports',
 }
 
 function typeIcon(type: DashboardNotification['type']) {
   if (type === 'new_order') { return <ShoppingBag className='h-4 w-4 text-blue-500' /> }
   if (type === 'new_product') { return <Package className='h-4 w-4 text-purple-500' /> }
   if (type === 'new_support_message') { return <MessageSquare className='h-4 w-4 text-orange-500' /> }
+  if (type === 'new_feedback') { return <Flag className='h-4 w-4 text-red-500' /> }
   return <UserPlus className='h-4 w-4 text-green-500' />
 }
 
