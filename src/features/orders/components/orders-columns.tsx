@@ -1,19 +1,9 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Banknote, Check, Copy, Eye, Loader2, MoreHorizontal, Smartphone } from 'lucide-react'
-import { toast } from 'sonner'
-import { useUpdateOrderStatus } from '@/hooks/api/use-orders'
+import { Banknote, Check, Copy, Eye, MoreHorizontal, Smartphone } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
   Tooltip,
   TooltipContent,
@@ -23,6 +13,7 @@ import {
 import { DataTableColumnHeader } from '@/components/data-table/column-header'
 import type { Order, OrderStatus } from '../data/schema'
 import { OrderDetailSheet } from './order-detail-sheet'
+import { StatusChangeDialog } from './status-change-dialog'
 import { UserProfileSheet } from '@/features/users/components/user-profile-sheet'
 
 // ─── Status pill ─────────────────────────────────────────────────────────────
@@ -145,29 +136,9 @@ function OrderIdCell({ id }: { id: number }) {
 
 // ─── Row actions ─────────────────────────────────────────────────────────────
 
-const statusLabel: Record<OrderStatus, string> = Object.fromEntries(
-  Object.entries(STATUS_CONFIG).map(([k, v]) => [k, v.label])
-) as Record<OrderStatus, string>
-
-const allStatuses: OrderStatus[] = [
-  'pending', 'approved', 'preparing', 'ready_for_pickup', 'assigned',
-  'out_for_delivery', 'delivered', 'completed', 'cancelled', 'refunded',
-]
-
 function OrderRowActions({ order }: { order: Order }) {
-  const updateStatus = useUpdateOrderStatus()
   const [detailOpen, setDetailOpen] = useState(false)
-
-  const handleChange = (status: OrderStatus) => {
-    if (status === order.status) { return }
-    updateStatus.mutate(
-      { id: order.id, status },
-      {
-        onSuccess: () => toast.success(`Order #${order.id} marked as ${statusLabel[status]}.`),
-        onError: () => toast.error('Failed to update order status.'),
-      }
-    )
-  }
+  const [statusOpen, setStatusOpen] = useState(false)
 
   return (
     <>
@@ -188,42 +159,34 @@ function OrderRowActions({ order }: { order: Order }) {
           </Tooltip>
         </TooltipProvider>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant='ghost'
-              size='icon'
-              className='h-8 w-8'
-              disabled={updateStatus.isPending}
-            >
-              {updateStatus.isPending ? (
-                <Loader2 className='h-4 w-4 animate-spin' />
-              ) : (
-                <MoreHorizontal className='h-4 w-4' />
-              )}
-              <span className='sr-only'>Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuLabel>Change status</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {allStatuses.map((status) => (
-              <DropdownMenuItem
-                key={status}
-                disabled={status === order.status}
-                onClick={() => handleChange(status)}
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='h-8 w-8'
+                onClick={() => setStatusOpen(true)}
               >
-                {statusLabel[status]}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                <MoreHorizontal className='h-4 w-4' />
+                <span className='sr-only'>Change status</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Change Status</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       <OrderDetailSheet
         orderId={order.id}
         open={detailOpen}
         onOpenChange={setDetailOpen}
+      />
+
+      <StatusChangeDialog
+        order={order}
+        open={statusOpen}
+        onOpenChange={setStatusOpen}
       />
     </>
   )
