@@ -6,6 +6,7 @@ import {
   TrendingUp,
   Clock,
   Loader2,
+  Banknote,
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { useAnalyticsOverview } from '@/hooks/api/use-analytics'
@@ -36,27 +37,87 @@ function compact(n: number): string {
   return new Intl.NumberFormat('en-US').format(n)
 }
 
-function formatCurrency(value: number | null | undefined) {
+function fmtCurrency(value: number | null | undefined) {
   const n = Number(value ?? 0)
-  return { short: `JOD ${compact(n)}`, full: `JOD ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}` }
+  return {
+    short: `JOD ${compact(n)}`,
+    full: `JOD ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}`,
+  }
 }
 
-function formatNumber(value: number | null | undefined) {
+function fmtNumber(value: number | null | undefined) {
   const n = Number(value ?? 0)
   return { short: compact(n), full: new Intl.NumberFormat('en-US').format(n) }
+}
+
+interface KpiConfig {
+  title: string
+  short: string
+  full: string
+  icon: React.ElementType
+  description: string
+  color: string
+  iconBg: string
+  extra?: { label: string; value: string }
 }
 
 export function Dashboard() {
   const { data, isLoading } = useAnalyticsOverview()
   const overview = data?.data
 
-  const kpis = [
-    { title: 'Total Revenue',    ...formatCurrency(overview?.total_revenue),  icon: DollarSign },
-    { title: 'Total Orders',     ...formatNumber(overview?.total_orders),      icon: ShoppingCart },
-    { title: 'Active Users',     ...formatNumber(overview?.total_users),       icon: Users },
-    { title: 'Active Products',  ...formatNumber(overview?.total_products),    icon: Package },
-    { title: 'Avg. Order Value', ...formatCurrency(overview?.avg_order_value), icon: TrendingUp },
-    { title: 'Pending Orders',   ...formatNumber(overview?.pending_orders),    icon: Clock },
+  const revenue = fmtCurrency(overview?.total_revenue)
+  const platformFee = fmtCurrency(overview?.total_platform_fee)
+
+  const kpis: KpiConfig[] = [
+    {
+      title: 'Total Revenue',
+      ...revenue,
+      icon: DollarSign,
+      description: 'Gross revenue from delivered & completed orders',
+      color: 'text-emerald-600',
+      iconBg: 'bg-emerald-50 dark:bg-emerald-950',
+      extra: { label: 'Platform Fee', value: platformFee.full },
+    },
+    {
+      title: 'Total Orders',
+      ...fmtNumber(overview?.total_orders),
+      icon: ShoppingCart,
+      description: 'All orders placed across the platform',
+      color: 'text-blue-600',
+      iconBg: 'bg-blue-50 dark:bg-blue-950',
+    },
+    {
+      title: 'Active Users',
+      ...fmtNumber(overview?.total_users),
+      icon: Users,
+      description: 'Registered customers and sellers',
+      color: 'text-purple-600',
+      iconBg: 'bg-purple-50 dark:bg-purple-950',
+    },
+    {
+      title: 'Active Products',
+      ...fmtNumber(overview?.total_products),
+      icon: Package,
+      description: 'Approved products available in the marketplace',
+      color: 'text-orange-600',
+      iconBg: 'bg-orange-50 dark:bg-orange-950',
+    },
+    {
+      title: 'Avg. Order Value',
+      ...fmtCurrency(overview?.avg_order_value),
+      icon: TrendingUp,
+      description: 'Average spend per completed order',
+      color: 'text-cyan-600',
+      iconBg: 'bg-cyan-50 dark:bg-cyan-950',
+    },
+    {
+      title: 'Pending Orders',
+      ...fmtNumber(overview?.pending_orders),
+      icon: Clock,
+      description: 'Orders awaiting approval or processing',
+      color: 'text-amber-600',
+      iconBg: 'bg-amber-50 dark:bg-amber-950',
+    },
   ]
 
   return (
@@ -80,22 +141,40 @@ export function Dashboard() {
           {/* KPI Cards */}
           <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
             {kpis.map((kpi) => (
-              <Card key={kpi.title}>
-                <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                  <CardTitle className='text-sm font-medium'>
-                    {kpi.title}
-                  </CardTitle>
-                  <kpi.icon className='h-4 w-4 text-muted-foreground' />
+              <Card key={kpi.title} className='overflow-hidden'>
+                <CardHeader className='flex flex-row items-start justify-between space-y-0 pb-2'>
+                  <div>
+                    <CardTitle className='text-sm font-medium text-muted-foreground'>
+                      {kpi.title}
+                    </CardTitle>
+                  </div>
+                  <div className={`rounded-lg p-2 ${kpi.iconBg}`}>
+                    <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {isLoading ? (
                     <Loader2 className='h-5 w-5 animate-spin text-muted-foreground' />
                   ) : (
                     <>
-                      <div className='text-2xl font-bold tracking-tight'>{kpi.short}</div>
+                      <div className={`text-2xl font-bold tracking-tight ${kpi.color}`}>
+                        {kpi.short}
+                      </div>
                       {kpi.short !== kpi.full && (
                         <p className='mt-0.5 text-xs text-muted-foreground'>{kpi.full}</p>
                       )}
+                      {kpi.extra && (
+                        <div className='mt-2 flex items-center gap-1.5 rounded-md bg-muted/50 px-2 py-1'>
+                          <Banknote className='h-3 w-3 text-muted-foreground' />
+                          <span className='text-xs text-muted-foreground'>
+                            {kpi.extra.label}:{' '}
+                            <span className='font-medium text-foreground'>
+                              {kpi.extra.value}
+                            </span>
+                          </span>
+                        </div>
+                      )}
+                      <p className='mt-2 text-xs text-muted-foreground'>{kpi.description}</p>
                     </>
                   )}
                 </CardContent>
@@ -109,7 +188,7 @@ export function Dashboard() {
               <CardHeader>
                 <CardTitle>Revenue Overview</CardTitle>
                 <CardDescription>
-                  Monthly revenue for the current year
+                  Monthly revenue trend for the current year
                 </CardDescription>
               </CardHeader>
               <CardContent className='ps-2'>
