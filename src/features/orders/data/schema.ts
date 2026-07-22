@@ -21,6 +21,7 @@ export const orderSchema = z.object({
     id: z.number(),
     name: z.string(),
     email: z.string(),
+    avatar: z.string().nullable().optional(),
   }),
   store: z
     .object({
@@ -34,6 +35,7 @@ export const orderSchema = z.object({
       id: z.number(),
       name: z.string(),
       email: z.string(),
+      avatar: z.string().nullable().optional(),
     })
     .nullable()
     .optional(),
