@@ -27,7 +27,7 @@ export function AppSidebar() {
   const authUser = useAuthStore((s) => s.user)
   const { data: notifData } = useDashboardNotifications()
 
-  const unread = notifData?.data?.filter((n) => !n.read_at) ?? []
+  const unread = (notifData?.pages.flatMap((p) => p.data) ?? []).filter((n) => !n.read_at)
   const unreadByType = unread.reduce<Record<string, number>>((acc, n) => {
     acc[n.type] = (acc[n.type] ?? 0) + 1
     return acc

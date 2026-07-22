@@ -23,10 +23,17 @@ export function AppTitle() {
             <Link
               to='/'
               onClick={() => setOpenMobile(false)}
-              className='grid flex-1 text-start text-sm leading-tight'
+              className='flex flex-1 items-center gap-2 text-start text-sm leading-tight'
             >
-              <span className='truncate font-bold'>CoreShop</span>
-              <span className='truncate text-xs'>Admin Dashboard</span>
+              <img
+                src='/logo.ico'
+                alt='CoreShop'
+                className='h-7 w-7 shrink-0 rounded-md'
+              />
+              <div className='grid min-w-0'>
+                <span className='truncate font-bold'>CoreShop</span>
+                <span className='truncate text-xs'>Admin Dashboard</span>
+              </div>
             </Link>
             <ToggleSidebar />
           </div>

@@ -27,6 +27,7 @@ import { Route as AuthenticatedStoresIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedSecurityIndexRouteImport } from './routes/_authenticated/security/index'
 import { Route as AuthenticatedReviewsIndexRouteImport } from './routes/_authenticated/reviews/index'
+import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports/index'
 import { Route as AuthenticatedProductsIndexRouteImport } from './routes/_authenticated/products/index'
 import { Route as AuthenticatedPayoutsIndexRouteImport } from './routes/_authenticated/payouts/index'
 import { Route as AuthenticatedPaymentIndexRouteImport } from './routes/_authenticated/payment/index'
@@ -138,6 +139,12 @@ const AuthenticatedReviewsIndexRoute =
   AuthenticatedReviewsIndexRouteImport.update({
     id: '/reviews/',
     path: '/reviews/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReportsIndexRoute =
+  AuthenticatedReportsIndexRouteImport.update({
+    id: '/reports/',
+    path: '/reports/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedProductsIndexRoute =
@@ -277,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/payment/': typeof AuthenticatedPaymentIndexRoute
   '/payouts/': typeof AuthenticatedPayoutsIndexRoute
   '/products/': typeof AuthenticatedProductsIndexRoute
+  '/reports/': typeof AuthenticatedReportsIndexRoute
   '/reviews/': typeof AuthenticatedReviewsIndexRoute
   '/security/': typeof AuthenticatedSecurityIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -313,6 +321,7 @@ export interface FileRoutesByTo {
   '/payment': typeof AuthenticatedPaymentIndexRoute
   '/payouts': typeof AuthenticatedPayoutsIndexRoute
   '/products': typeof AuthenticatedProductsIndexRoute
+  '/reports': typeof AuthenticatedReportsIndexRoute
   '/reviews': typeof AuthenticatedReviewsIndexRoute
   '/security': typeof AuthenticatedSecurityIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
@@ -352,6 +361,7 @@ export interface FileRoutesById {
   '/_authenticated/payment/': typeof AuthenticatedPaymentIndexRoute
   '/_authenticated/payouts/': typeof AuthenticatedPayoutsIndexRoute
   '/_authenticated/products/': typeof AuthenticatedProductsIndexRoute
+  '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/reviews/': typeof AuthenticatedReviewsIndexRoute
   '/_authenticated/security/': typeof AuthenticatedSecurityIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -391,6 +401,7 @@ export interface FileRouteTypes {
     | '/payment/'
     | '/payouts/'
     | '/products/'
+    | '/reports/'
     | '/reviews/'
     | '/security/'
     | '/settings/'
@@ -427,6 +438,7 @@ export interface FileRouteTypes {
     | '/payment'
     | '/payouts'
     | '/products'
+    | '/reports'
     | '/reviews'
     | '/security'
     | '/settings'
@@ -465,6 +477,7 @@ export interface FileRouteTypes {
     | '/_authenticated/payment/'
     | '/_authenticated/payouts/'
     | '/_authenticated/products/'
+    | '/_authenticated/reports/'
     | '/_authenticated/reviews/'
     | '/_authenticated/security/'
     | '/_authenticated/settings/'
@@ -613,6 +626,13 @@ declare module '@tanstack/react-router' {
       path: '/reviews'
       fullPath: '/reviews/'
       preLoaderRoute: typeof AuthenticatedReviewsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reports/': {
+      id: '/_authenticated/reports/'
+      path: '/reports'
+      fullPath: '/reports/'
+      preLoaderRoute: typeof AuthenticatedReportsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/products/': {
@@ -783,6 +803,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPaymentIndexRoute: typeof AuthenticatedPaymentIndexRoute
   AuthenticatedPayoutsIndexRoute: typeof AuthenticatedPayoutsIndexRoute
   AuthenticatedProductsIndexRoute: typeof AuthenticatedProductsIndexRoute
+  AuthenticatedReportsIndexRoute: typeof AuthenticatedReportsIndexRoute
   AuthenticatedReviewsIndexRoute: typeof AuthenticatedReviewsIndexRoute
   AuthenticatedSecurityIndexRoute: typeof AuthenticatedSecurityIndexRoute
   AuthenticatedStoresIndexRoute: typeof AuthenticatedStoresIndexRoute
@@ -806,6 +827,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPaymentIndexRoute: AuthenticatedPaymentIndexRoute,
   AuthenticatedPayoutsIndexRoute: AuthenticatedPayoutsIndexRoute,
   AuthenticatedProductsIndexRoute: AuthenticatedProductsIndexRoute,
+  AuthenticatedReportsIndexRoute: AuthenticatedReportsIndexRoute,
   AuthenticatedReviewsIndexRoute: AuthenticatedReviewsIndexRoute,
   AuthenticatedSecurityIndexRoute: AuthenticatedSecurityIndexRoute,
   AuthenticatedStoresIndexRoute: AuthenticatedStoresIndexRoute,

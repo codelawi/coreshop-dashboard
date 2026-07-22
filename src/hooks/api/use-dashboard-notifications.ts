@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '@/lib/axios'
 
 export interface DashboardNotification {
@@ -11,6 +11,12 @@ export interface DashboardNotification {
   created_at: string
 }
 
+interface NotificationsPage {
+  data: DashboardNotification[]
+  has_more: boolean
+  unread_count: number
+}
+
 export interface NotificationSettings {
   notif_new_orders: boolean
   notif_new_products: boolean
@@ -18,12 +24,17 @@ export interface NotificationSettings {
 }
 
 export function useDashboardNotifications() {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['dashboard-notifications'],
-    queryFn: async () => {
-      const res = await api.get('/admin/dashboard-notifications')
-      return res.data as { data: DashboardNotification[]; unread_count: number }
+    queryFn: async ({ pageParam }: { pageParam: number }) => {
+      const res = await api.get('/admin/dashboard-notifications', {
+        params: { page: pageParam, per_page: 20 },
+      })
+      return res.data as NotificationsPage
     },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _pages, lastPageParam) =>
+      lastPage.has_more ? lastPageParam + 1 : undefined,
     staleTime: 30_000,
   })
 }
@@ -43,7 +54,7 @@ export function useMarkNotificationRead() {
 export function useMarkAllNotificationsRead() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (type: string | void) => {
+    mutationFn: async (type?: string) => {
       await api.post('/admin/dashboard-notifications/read-all', type ? { type } : undefined)
     },
     onSuccess: () => {

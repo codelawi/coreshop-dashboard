@@ -1,15 +1,16 @@
-import { useEffect, useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { Bell, CheckCheck, Flag, MessageSquare, Package, ShoppingBag, UserPlus } from 'lucide-react'
+import { Bell, Flag, Loader2, MessageSquare, Package, ShoppingBag, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
+import type { InfiniteData } from '@tanstack/react-query'
 import echo from '@/lib/echo'
 import {
   type DashboardNotification,
   useDashboardNotifications,
-  useMarkAllNotificationsRead,
   useMarkNotificationRead,
 } from '@/hooks/api/use-dashboard-notifications'
+import api from '@/lib/axios'
 import { Button } from '@/components/ui/button'
 import {
   Popover,
@@ -18,6 +19,12 @@ import {
 } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
+
+type NotificationsInfiniteData = InfiniteData<{
+  data: DashboardNotification[]
+  has_more: boolean
+  unread_count: number
+}>
 
 const NOTIFICATION_ROUTE: Record<DashboardNotification['type'], string> = {
   new_order: '/orders',
@@ -66,21 +73,61 @@ export function NotificationBell() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
-  const { data } = useDashboardNotifications()
-  const markRead = useMarkNotificationRead()
-  const markAll = useMarkAllNotificationsRead()
 
-  const unreadCount = data?.unread_count ?? 0
-  const notifications = data?.data ?? []
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useDashboardNotifications()
+  const markRead = useMarkNotificationRead()
+
+  const notifications = data?.pages.flatMap((p) => p.data) ?? []
+  const unreadCount = notifications.filter((n) => !n.read_at).length
+
+  // Auto-mark all as read when dropdown opens
+  useEffect(() => {
+    if (!open || unreadCount === 0) { return }
+
+    const now = new Date().toISOString()
+
+    // Optimistic update — mark every item read in cache immediately
+    queryClient.setQueryData<NotificationsInfiniteData>(
+      ['dashboard-notifications'],
+      (old) => {
+        if (!old) { return old }
+        return {
+          ...old,
+          pages: old.pages.map((page) => ({
+            ...page,
+            unread_count: 0,
+            data: page.data.map((n) => ({
+              ...n,
+              read_at: n.read_at ?? now,
+            })),
+          })),
+        }
+      }
+    )
+
+    // Fire API in background — no need to await or invalidate
+    api.post('/admin/dashboard-notifications/read-all').catch(() => {
+      // silent — worst case next refetch will re-sync
+    })
+  }, [open])
 
   const handleIncoming = useCallback(
     (payload: DashboardNotification) => {
-      queryClient.setQueryData(
+      queryClient.setQueryData<NotificationsInfiniteData>(
         ['dashboard-notifications'],
-        (old: { data: DashboardNotification[]; unread_count: number } | undefined) => ({
-          data: [payload, ...(old?.data ?? [])].slice(0, 50),
-          unread_count: (old?.unread_count ?? 0) + 1,
-        })
+        (old) => {
+          if (!old) { return old }
+          return {
+            ...old,
+            pages: [
+              {
+                ...old.pages[0],
+                data: [payload, ...old.pages[0].data],
+              },
+              ...old.pages.slice(1),
+            ],
+          }
+        }
       )
       playNotificationSound()
       toast(payload.title, {
@@ -126,16 +173,10 @@ export function NotificationBell() {
       <PopoverContent align='end' className='w-80 p-0'>
         <div className='flex items-center justify-between px-4 py-3'>
           <span className='text-sm font-semibold'>Notifications</span>
-          {unreadCount > 0 && (
-            <Button
-              variant='ghost'
-              size='sm'
-              className='h-auto gap-1 px-2 py-1 text-xs'
-              onClick={() => markAll.mutate()}
-            >
-              <CheckCheck className='h-3 w-3' />
-              Mark all read
-            </Button>
+          {notifications.length > 0 && (
+            <span className='text-xs text-muted-foreground'>
+              {notifications.length} loaded
+            </span>
           )}
         </div>
         <Separator />
@@ -164,6 +205,23 @@ export function NotificationBell() {
                   )}
                 </button>
               ))}
+
+              {hasNextPage && (
+                <div className='p-3'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    className='w-full text-xs'
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? (
+                      <Loader2 className='me-1.5 h-3 w-3 animate-spin' />
+                    ) : null}
+                    Load more
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </ScrollArea>
