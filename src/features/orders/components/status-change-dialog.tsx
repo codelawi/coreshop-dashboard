@@ -37,10 +37,12 @@ interface StatusConfig {
   action: string
   Icon: React.ElementType
   iconClass: string
-  iconBg: string
-  cardBase: string
-  cardHover: string
-  cardSelected: string
+  hoverCard: string
+  selectedCard: string
+  hoverIconBg: string
+  selectedIconBg: string
+  hoverActionColor: string
+  selectedActionColor: string
   pill: string
   selectedRing: string
   confirmBg: string
@@ -54,10 +56,12 @@ const STATUS_OPTIONS: Record<OrderStatus, StatusConfig> = {
     action: 'Customer receives a notification that their order is under review.',
     Icon: Clock,
     iconClass: 'text-amber-500',
-    iconBg: 'bg-amber-100 dark:bg-amber-900/60',
-    cardBase: 'border border-border border-l-[3px] border-l-amber-400',
-    cardHover: 'hover:bg-amber-50/60 dark:hover:bg-amber-950/30 hover:shadow-sm',
-    cardSelected: 'ring-2 ring-amber-400 bg-amber-50 dark:bg-amber-950/50 shadow-sm',
+    hoverCard: 'hover:bg-amber-50/60 dark:hover:bg-amber-950/20',
+    selectedCard: 'ring-2 ring-amber-400 bg-amber-50/60 dark:bg-amber-950/20',
+    hoverIconBg: 'group-hover:bg-amber-100 dark:group-hover:bg-amber-900/60',
+    selectedIconBg: 'bg-amber-100 dark:bg-amber-900/60',
+    hoverActionColor: 'group-hover:text-amber-500',
+    selectedActionColor: 'text-amber-500',
     pill: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400',
     selectedRing: 'ring-amber-400',
     confirmBg: 'bg-amber-50 dark:bg-amber-950/50',
@@ -69,10 +73,12 @@ const STATUS_OPTIONS: Record<OrderStatus, StatusConfig> = {
     action: 'Seller is notified immediately to start preparing the order.',
     Icon: ThumbsUp,
     iconClass: 'text-blue-500',
-    iconBg: 'bg-blue-100 dark:bg-blue-900/60',
-    cardBase: 'border border-border border-l-[3px] border-l-blue-400',
-    cardHover: 'hover:bg-blue-50/60 dark:hover:bg-blue-950/30 hover:shadow-sm',
-    cardSelected: 'ring-2 ring-blue-400 bg-blue-50 dark:bg-blue-950/50 shadow-sm',
+    hoverCard: 'hover:bg-blue-50/60 dark:hover:bg-blue-950/20',
+    selectedCard: 'ring-2 ring-blue-400 bg-blue-50/60 dark:bg-blue-950/20',
+    hoverIconBg: 'group-hover:bg-blue-100 dark:group-hover:bg-blue-900/60',
+    selectedIconBg: 'bg-blue-100 dark:bg-blue-900/60',
+    hoverActionColor: 'group-hover:text-blue-500',
+    selectedActionColor: 'text-blue-500',
     pill: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400',
     selectedRing: 'ring-blue-400',
     confirmBg: 'bg-blue-50 dark:bg-blue-950/50',
@@ -84,10 +90,12 @@ const STATUS_OPTIONS: Record<OrderStatus, StatusConfig> = {
     action: 'Customer is updated that their order is being carefully prepared.',
     Icon: ChefHat,
     iconClass: 'text-orange-500',
-    iconBg: 'bg-orange-100 dark:bg-orange-900/60',
-    cardBase: 'border border-border border-l-[3px] border-l-orange-400',
-    cardHover: 'hover:bg-orange-50/60 dark:hover:bg-orange-950/30 hover:shadow-sm',
-    cardSelected: 'ring-2 ring-orange-400 bg-orange-50 dark:bg-orange-950/50 shadow-sm',
+    hoverCard: 'hover:bg-orange-50/60 dark:hover:bg-orange-950/20',
+    selectedCard: 'ring-2 ring-orange-400 bg-orange-50/60 dark:bg-orange-950/20',
+    hoverIconBg: 'group-hover:bg-orange-100 dark:group-hover:bg-orange-900/60',
+    selectedIconBg: 'bg-orange-100 dark:bg-orange-900/60',
+    hoverActionColor: 'group-hover:text-orange-500',
+    selectedActionColor: 'text-orange-500',
     pill: 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-400',
     selectedRing: 'ring-orange-400',
     confirmBg: 'bg-orange-50 dark:bg-orange-950/50',
@@ -99,10 +107,12 @@ const STATUS_OPTIONS: Record<OrderStatus, StatusConfig> = {
     action: 'Nearby available drivers receive a pickup request for this order.',
     Icon: PackageCheck,
     iconClass: 'text-cyan-500',
-    iconBg: 'bg-cyan-100 dark:bg-cyan-900/60',
-    cardBase: 'border border-border border-l-[3px] border-l-cyan-400',
-    cardHover: 'hover:bg-cyan-50/60 dark:hover:bg-cyan-950/30 hover:shadow-sm',
-    cardSelected: 'ring-2 ring-cyan-400 bg-cyan-50 dark:bg-cyan-950/50 shadow-sm',
+    hoverCard: 'hover:bg-cyan-50/60 dark:hover:bg-cyan-950/20',
+    selectedCard: 'ring-2 ring-cyan-400 bg-cyan-50/60 dark:bg-cyan-950/20',
+    hoverIconBg: 'group-hover:bg-cyan-100 dark:group-hover:bg-cyan-900/60',
+    selectedIconBg: 'bg-cyan-100 dark:bg-cyan-900/60',
+    hoverActionColor: 'group-hover:text-cyan-500',
+    selectedActionColor: 'text-cyan-500',
     pill: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-400',
     selectedRing: 'ring-cyan-400',
     confirmBg: 'bg-cyan-50 dark:bg-cyan-950/50',
@@ -114,10 +124,12 @@ const STATUS_OPTIONS: Record<OrderStatus, StatusConfig> = {
     action: 'Customer receives driver details and an estimated delivery time.',
     Icon: UserCheck,
     iconClass: 'text-indigo-500',
-    iconBg: 'bg-indigo-100 dark:bg-indigo-900/60',
-    cardBase: 'border border-border border-l-[3px] border-l-indigo-400',
-    cardHover: 'hover:bg-indigo-50/60 dark:hover:bg-indigo-950/30 hover:shadow-sm',
-    cardSelected: 'ring-2 ring-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 shadow-sm',
+    hoverCard: 'hover:bg-indigo-50/60 dark:hover:bg-indigo-950/20',
+    selectedCard: 'ring-2 ring-indigo-400 bg-indigo-50/60 dark:bg-indigo-950/20',
+    hoverIconBg: 'group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/60',
+    selectedIconBg: 'bg-indigo-100 dark:bg-indigo-900/60',
+    hoverActionColor: 'group-hover:text-indigo-500',
+    selectedActionColor: 'text-indigo-500',
     pill: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-400',
     selectedRing: 'ring-indigo-400',
     confirmBg: 'bg-indigo-50 dark:bg-indigo-950/50',
@@ -125,14 +137,16 @@ const STATUS_OPTIONS: Record<OrderStatus, StatusConfig> = {
   },
   out_for_delivery: {
     label: 'Out for Delivery',
-    description: 'Order is en route to the customer\'s address',
+    description: "Order is en route to the customer's address",
     action: 'Customer receives live updates and a delivery ETA.',
     Icon: Truck,
     iconClass: 'text-purple-500',
-    iconBg: 'bg-purple-100 dark:bg-purple-900/60',
-    cardBase: 'border border-border border-l-[3px] border-l-purple-400',
-    cardHover: 'hover:bg-purple-50/60 dark:hover:bg-purple-950/30 hover:shadow-sm',
-    cardSelected: 'ring-2 ring-purple-400 bg-purple-50 dark:bg-purple-950/50 shadow-sm',
+    hoverCard: 'hover:bg-purple-50/60 dark:hover:bg-purple-950/20',
+    selectedCard: 'ring-2 ring-purple-400 bg-purple-50/60 dark:bg-purple-950/20',
+    hoverIconBg: 'group-hover:bg-purple-100 dark:group-hover:bg-purple-900/60',
+    selectedIconBg: 'bg-purple-100 dark:bg-purple-900/60',
+    hoverActionColor: 'group-hover:text-purple-500',
+    selectedActionColor: 'text-purple-500',
     pill: 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-400',
     selectedRing: 'ring-purple-400',
     confirmBg: 'bg-purple-50 dark:bg-purple-950/50',
@@ -144,10 +158,12 @@ const STATUS_OPTIONS: Record<OrderStatus, StatusConfig> = {
     action: 'Customer is prompted to confirm receipt and leave a review.',
     Icon: PackageOpen,
     iconClass: 'text-green-500',
-    iconBg: 'bg-green-100 dark:bg-green-900/60',
-    cardBase: 'border border-border border-l-[3px] border-l-green-400',
-    cardHover: 'hover:bg-green-50/60 dark:hover:bg-green-950/30 hover:shadow-sm',
-    cardSelected: 'ring-2 ring-green-400 bg-green-50 dark:bg-green-950/50 shadow-sm',
+    hoverCard: 'hover:bg-green-50/60 dark:hover:bg-green-950/20',
+    selectedCard: 'ring-2 ring-green-400 bg-green-50/60 dark:bg-green-950/20',
+    hoverIconBg: 'group-hover:bg-green-100 dark:group-hover:bg-green-900/60',
+    selectedIconBg: 'bg-green-100 dark:bg-green-900/60',
+    hoverActionColor: 'group-hover:text-green-500',
+    selectedActionColor: 'text-green-500',
     pill: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400',
     selectedRing: 'ring-green-400',
     confirmBg: 'bg-green-50 dark:bg-green-950/50',
@@ -159,10 +175,12 @@ const STATUS_OPTIONS: Record<OrderStatus, StatusConfig> = {
     action: 'Payment is finalized and seller receives their earnings payout.',
     Icon: CheckCircle2,
     iconClass: 'text-emerald-500',
-    iconBg: 'bg-emerald-100 dark:bg-emerald-900/60',
-    cardBase: 'border border-border border-l-[3px] border-l-emerald-400',
-    cardHover: 'hover:bg-emerald-50/60 dark:hover:bg-emerald-950/30 hover:shadow-sm',
-    cardSelected: 'ring-2 ring-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 shadow-sm',
+    hoverCard: 'hover:bg-emerald-50/60 dark:hover:bg-emerald-950/20',
+    selectedCard: 'ring-2 ring-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/20',
+    hoverIconBg: 'group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/60',
+    selectedIconBg: 'bg-emerald-100 dark:bg-emerald-900/60',
+    hoverActionColor: 'group-hover:text-emerald-500',
+    selectedActionColor: 'text-emerald-500',
     pill: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400',
     selectedRing: 'ring-emerald-400',
     confirmBg: 'bg-emerald-50 dark:bg-emerald-950/50',
@@ -174,10 +192,12 @@ const STATUS_OPTIONS: Record<OrderStatus, StatusConfig> = {
     action: 'Customer is notified and a refund is initiated if payment was collected.',
     Icon: XCircle,
     iconClass: 'text-red-500',
-    iconBg: 'bg-red-100 dark:bg-red-900/60',
-    cardBase: 'border border-border border-l-[3px] border-l-red-400',
-    cardHover: 'hover:bg-red-50/60 dark:hover:bg-red-950/30 hover:shadow-sm',
-    cardSelected: 'ring-2 ring-red-400 bg-red-50 dark:bg-red-950/50 shadow-sm',
+    hoverCard: 'hover:bg-red-50/60 dark:hover:bg-red-950/20',
+    selectedCard: 'ring-2 ring-red-400 bg-red-50/60 dark:bg-red-950/20',
+    hoverIconBg: 'group-hover:bg-red-100 dark:group-hover:bg-red-900/60',
+    selectedIconBg: 'bg-red-100 dark:bg-red-900/60',
+    hoverActionColor: 'group-hover:text-red-500',
+    selectedActionColor: 'text-red-500',
     pill: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400',
     selectedRing: 'ring-red-400',
     confirmBg: 'bg-red-50 dark:bg-red-950/50',
@@ -189,10 +209,12 @@ const STATUS_OPTIONS: Record<OrderStatus, StatusConfig> = {
     action: 'Refund confirmation is sent and financial records are updated.',
     Icon: RotateCcw,
     iconClass: 'text-rose-500',
-    iconBg: 'bg-rose-100 dark:bg-rose-900/60',
-    cardBase: 'border border-border border-l-[3px] border-l-rose-400',
-    cardHover: 'hover:bg-rose-50/60 dark:hover:bg-rose-950/30 hover:shadow-sm',
-    cardSelected: 'ring-2 ring-rose-400 bg-rose-50 dark:bg-rose-950/50 shadow-sm',
+    hoverCard: 'hover:bg-rose-50/60 dark:hover:bg-rose-950/20',
+    selectedCard: 'ring-2 ring-rose-400 bg-rose-50/60 dark:bg-rose-950/20',
+    hoverIconBg: 'group-hover:bg-rose-100 dark:group-hover:bg-rose-900/60',
+    selectedIconBg: 'bg-rose-100 dark:bg-rose-900/60',
+    hoverActionColor: 'group-hover:text-rose-500',
+    selectedActionColor: 'text-rose-500',
     pill: 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400',
     selectedRing: 'ring-rose-400',
     confirmBg: 'bg-rose-50 dark:bg-rose-950/50',
@@ -205,13 +227,20 @@ const ALL_STATUSES = Object.keys(STATUS_OPTIONS) as OrderStatus[]
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getInitials(name: string) {
-  return name.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
+  return name
+    .split(' ')
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase()
 }
 
 function StatusPill({ status }: { status: OrderStatus }) {
   const cfg = STATUS_OPTIONS[status]
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${cfg.pill}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${cfg.pill}`}
+    >
       <cfg.Icon className='h-3 w-3' />
       {cfg.label}
     </span>
@@ -250,15 +279,17 @@ function SelectPhase({ order, selected, onSelect, onContinue, onClose }: SelectP
   return (
     <div className='flex flex-col'>
       {/* Order summary card */}
-      <div className='mx-6 flex items-center gap-3 rounded-2xl border bg-muted/30 p-4'>
-        <Avatar className='h-11 w-11 shrink-0 ring-2 ring-border'>
+      <div className='mx-4 flex items-start gap-3 rounded-xl border bg-muted/30 p-3 sm:mx-6 sm:items-center sm:p-4'>
+        <Avatar className='h-9 w-9 shrink-0 ring-2 ring-border sm:h-11 sm:w-11'>
           {order.client.avatar && <AvatarImage src={order.client.avatar} />}
-          <AvatarFallback className='text-sm font-semibold'>
+          <AvatarFallback className='text-xs font-semibold sm:text-sm'>
             {getInitials(order.client.name)}
           </AvatarFallback>
         </Avatar>
         <div className='min-w-0 flex-1'>
-          <p className='truncate font-semibold leading-none'>{order.client.name}</p>
+          <p className='truncate text-sm font-semibold leading-none sm:text-base'>
+            {order.client.name}
+          </p>
           <p className='mt-0.5 truncate text-xs text-muted-foreground'>{order.client.email}</p>
           <div className='mt-1.5 flex flex-wrap items-center gap-1.5'>
             <span className='font-mono text-xs font-bold text-muted-foreground'>#{order.id}</span>
@@ -269,20 +300,20 @@ function SelectPhase({ order, selected, onSelect, onContinue, onClose }: SelectP
             <PaymentChip method={order.payment_method} />
           </div>
         </div>
-        <div className='shrink-0'>
+        <div className='shrink-0 text-right'>
           <StatusPill status={order.status} />
           <p className='mt-1 text-center text-[10px] text-muted-foreground'>Current</p>
         </div>
       </div>
 
       {/* Section label */}
-      <div className='mx-6 mt-5 mb-3'>
+      <div className='mx-4 mt-4 mb-2 sm:mx-6 sm:mt-5 sm:mb-3'>
         <p className='text-sm font-semibold text-foreground'>Select a new status</p>
-        <p className='text-xs text-muted-foreground'>Click a status card to see what will happen</p>
+        <p className='text-xs text-muted-foreground'>Click a card to see what will happen</p>
       </div>
 
       {/* Status grid */}
-      <div className='mx-6 grid grid-cols-2 gap-2'>
+      <div className='mx-4 grid grid-cols-1 gap-2 sm:mx-6 sm:grid-cols-2'>
         {ALL_STATUSES.map((status) => {
           const cfg = STATUS_OPTIONS[status]
           const isCurrent = status === order.status
@@ -294,39 +325,50 @@ function SelectPhase({ order, selected, onSelect, onContinue, onClose }: SelectP
               onClick={() => { if (!isCurrent) { onSelect(status) } }}
               disabled={isCurrent}
               className={[
-                'relative flex items-start gap-3 rounded-xl p-3.5 text-left transition-all duration-150',
-                cfg.cardBase,
+                'group relative flex items-center gap-3 rounded-xl border p-3 text-left transition-all duration-150 sm:items-start sm:p-3.5',
                 isCurrent
-                  ? 'cursor-not-allowed opacity-40 bg-muted/20'
+                  ? 'cursor-not-allowed border-border opacity-40'
                   : isSelected
-                    ? cfg.cardSelected
-                    : `bg-card ${cfg.cardHover} cursor-pointer`,
+                    ? `cursor-pointer border-transparent shadow-sm ${cfg.selectedCard}`
+                    : `cursor-pointer border-border bg-card ${cfg.hoverCard} hover:shadow-sm`,
               ].join(' ')}
             >
               {/* Icon badge */}
-              <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${cfg.iconBg}`}>
-                <cfg.Icon className={`h-4.5 w-4.5 h-[18px] w-[18px] ${cfg.iconClass}`} />
+              <div
+                className={[
+                  'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors sm:mt-0.5',
+                  isSelected ? cfg.selectedIconBg : `bg-muted ${cfg.hoverIconBg}`,
+                ].join(' ')}
+              >
+                <cfg.Icon className={`h-4 w-4 ${cfg.iconClass}`} />
               </div>
 
               {/* Text */}
               <div className='min-w-0 flex-1'>
                 <p className='text-sm font-semibold leading-tight'>{cfg.label}</p>
-                <p className='mt-0.5 text-[11px] leading-snug text-muted-foreground'>
+                <p className='mt-0.5 hidden text-[11px] leading-snug text-muted-foreground sm:block'>
                   {cfg.description}
                 </p>
-                <p className={`mt-1.5 text-[11px] font-medium leading-snug ${cfg.iconClass}`}>
+                <p
+                  className={[
+                    'mt-1 text-[11px] font-medium leading-snug transition-colors',
+                    isSelected ? cfg.selectedActionColor : `text-muted-foreground ${cfg.hoverActionColor}`,
+                  ].join(' ')}
+                >
                   → {cfg.action.split('. ')[0]}
                 </p>
               </div>
 
               {/* State indicator */}
               {isCurrent && (
-                <span className='absolute right-2.5 top-2.5 rounded-full bg-foreground/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground'>
+                <span className='shrink-0 rounded-full bg-foreground/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground'>
                   Now
                 </span>
               )}
               {isSelected && !isCurrent && (
-                <span className={`absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full ${cfg.iconBg}`}>
+                <span
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${cfg.selectedIconBg}`}
+                >
                   <Check className={`h-3 w-3 ${cfg.iconClass}`} />
                 </span>
               )}
@@ -336,15 +378,11 @@ function SelectPhase({ order, selected, onSelect, onContinue, onClose }: SelectP
       </div>
 
       {/* Footer */}
-      <div className='mx-6 mt-5 flex items-center justify-between border-t pt-4'>
-        <Button variant='ghost' onClick={onClose} className='text-muted-foreground'>
+      <div className='mx-4 mt-4 flex items-center justify-between border-t pt-4 sm:mx-6 sm:mt-5'>
+        <Button variant='ghost' size='sm' onClick={onClose} className='text-muted-foreground'>
           Cancel
         </Button>
-        <Button
-          onClick={onContinue}
-          disabled={!selected}
-          className='gap-2 px-5'
-        >
+        <Button onClick={onContinue} disabled={!selected} className='gap-2 px-4 sm:px-5'>
           Review Change
           <ArrowRight className='h-4 w-4' />
         </Button>
@@ -365,29 +403,28 @@ interface ConfirmPhaseProps {
 }
 
 function ConfirmPhase({ order, from, to, isPending, onConfirm, onBack }: ConfirmPhaseProps) {
-  const fromCfg = STATUS_OPTIONS[from]
   const toCfg = STATUS_OPTIONS[to]
 
   const isDestructive = to === 'cancelled' || to === 'refunded'
   const isPositive = to === 'completed' || to === 'delivered'
 
   return (
-    <div className='flex flex-col items-center px-8 pb-2 pt-2'>
+    <div className='flex flex-col items-center px-4 pb-2 pt-2 sm:px-8'>
       {/* Large icon */}
       <div
-        className={`mb-5 flex h-24 w-24 items-center justify-center rounded-3xl ${toCfg.iconBg} shadow-lg ring-4 ring-border`}
+        className={`mb-4 flex h-20 w-20 items-center justify-center rounded-3xl shadow-md ring-4 ring-border sm:mb-5 sm:h-24 sm:w-24 ${toCfg.selectedIconBg}`}
       >
-        <toCfg.Icon className={`h-12 w-12 ${toCfg.iconClass}`} />
+        <toCfg.Icon className={`h-10 w-10 sm:h-12 sm:w-12 ${toCfg.iconClass}`} />
       </div>
 
-      <h3 className='text-xl font-bold tracking-tight'>Confirm Status Change</h3>
+      <h3 className='text-lg font-bold tracking-tight sm:text-xl'>Confirm Status Change</h3>
       <p className='mt-1.5 text-sm text-muted-foreground'>
-        You are updating order{' '}
+        Updating order{' '}
         <span className='font-mono font-bold text-foreground'>#{order.id}</span>
       </p>
 
       {/* From → To */}
-      <div className='mt-6 flex w-full items-center justify-center gap-4'>
+      <div className='mt-5 flex w-full flex-wrap items-center justify-center gap-3 sm:mt-6 sm:gap-4'>
         <div className='flex flex-col items-center gap-1.5'>
           <StatusPill status={from} />
           <span className='text-[10px] font-medium uppercase tracking-wide text-muted-foreground'>
@@ -396,9 +433,9 @@ function ConfirmPhase({ order, from, to, isPending, onConfirm, onBack }: Confirm
         </div>
 
         <div className='flex items-center gap-1 text-muted-foreground'>
-          <div className='h-px w-8 bg-border' />
+          <div className='h-px w-6 bg-border sm:w-8' />
           <ArrowRight className='h-4 w-4' />
-          <div className='h-px w-8 bg-border' />
+          <div className='h-px w-6 bg-border sm:w-8' />
         </div>
 
         <div className='flex flex-col items-center gap-1.5'>
@@ -416,7 +453,7 @@ function ConfirmPhase({ order, from, to, isPending, onConfirm, onBack }: Confirm
 
       {/* Impact box */}
       <div
-        className={`mt-6 w-full rounded-2xl border-l-[4px] p-4 ${toCfg.confirmBg} ${toCfg.confirmBorder}`}
+        className={`mt-5 w-full rounded-xl border-l-4 p-3 sm:mt-6 sm:rounded-2xl sm:p-4 ${toCfg.confirmBg} ${toCfg.confirmBorder}`}
       >
         <p className='mb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground'>
           What happens next
@@ -427,7 +464,7 @@ function ConfirmPhase({ order, from, to, isPending, onConfirm, onBack }: Confirm
       </div>
 
       {/* Order strip */}
-      <div className='mt-4 flex w-full items-center gap-3 rounded-2xl border bg-muted/30 px-4 py-3'>
+      <div className='mt-3 flex w-full items-center gap-3 rounded-xl border bg-muted/30 px-3 py-2.5 sm:mt-4 sm:rounded-2xl sm:px-4 sm:py-3'>
         <Avatar className='h-8 w-8 shrink-0'>
           {order.client.avatar && <AvatarImage src={order.client.avatar} />}
           <AvatarFallback className='text-xs'>{getInitials(order.client.name)}</AvatarFallback>
@@ -443,7 +480,7 @@ function ConfirmPhase({ order, from, to, isPending, onConfirm, onBack }: Confirm
       </div>
 
       {/* Actions */}
-      <div className='mt-6 flex w-full gap-3'>
+      <div className='mt-5 flex w-full gap-3 sm:mt-6'>
         <Button
           variant='outline'
           className='flex-1 gap-2'
@@ -504,9 +541,7 @@ export function StatusChangeDialog({ order, open, onOpenChange }: StatusChangeDi
       { id: order.id, status: selected },
       {
         onSuccess: () => {
-          toast.success(
-            `Order #${order.id} updated to "${STATUS_OPTIONS[selected].label}".`
-          )
+          toast.success(`Order #${order.id} updated to "${STATUS_OPTIONS[selected].label}".`)
           handleClose()
         },
         onError: () => {
@@ -518,9 +553,9 @@ export function StatusChangeDialog({ order, open, onOpenChange }: StatusChangeDi
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className='max-w-2xl gap-0 overflow-hidden p-0'>
-        <DialogHeader className='border-b px-6 py-4'>
-          <div className='flex items-center gap-3'>
+      <DialogContent className='w-full max-w-[calc(100vw-2rem)] gap-0 overflow-hidden p-0 sm:max-w-2xl'>
+        <DialogHeader className='border-b px-4 py-3 sm:px-6 sm:py-4'>
+          <div className='flex items-center gap-2 sm:gap-3'>
             {phase === 'confirm' && (
               <button
                 onClick={() => setPhase('select')}
@@ -531,7 +566,7 @@ export function StatusChangeDialog({ order, open, onOpenChange }: StatusChangeDi
               </button>
             )}
             <div>
-              <DialogTitle className='text-base font-semibold'>
+              <DialogTitle className='text-sm font-semibold sm:text-base'>
                 {phase === 'select' ? 'Change Order Status' : 'Confirm Status Change'}
               </DialogTitle>
               <p className='mt-0.5 text-xs text-muted-foreground'>
@@ -543,7 +578,7 @@ export function StatusChangeDialog({ order, open, onOpenChange }: StatusChangeDi
           </div>
         </DialogHeader>
 
-        <div className='max-h-[82vh] overflow-y-auto py-5'>
+        <div className='max-h-[85dvh] overflow-y-auto py-4 sm:py-5'>
           {phase === 'select' ? (
             <SelectPhase
               order={order}
