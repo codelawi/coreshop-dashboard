@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import {
   Area,
@@ -16,11 +17,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { PeriodToggle } from './period-toggle'
 
 const MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ]
+
+const HOURS = Array.from({ length: 24 }, (_, i) => `${i}:00`)
 
 const tooltipStyle = {
   background: 'var(--color-popover)',
@@ -31,26 +35,46 @@ const tooltipStyle = {
 }
 
 interface ApiPoint {
-  month: number
+  month?: number
+  hour?: number
   total: string | number
 }
 
 export function RevenueChart() {
-  const { data, isLoading } = useAnalyticsRevenue()
+  const [period, setPeriod] = useState<'monthly' | 'hourly'>('monthly')
+  const { data, isLoading } = useAnalyticsRevenue(period)
   const apiData: ApiPoint[] = data?.data ?? []
-  const byMonth = new Map<number, number>()
-  apiData.forEach((p) => byMonth.set(Number(p.month), Number(p.total)))
 
-  const chartData = MONTHS.map((m, i) => ({
-    month: m,
-    revenue: byMonth.get(i + 1) ?? 0,
-  }))
+  let chartData: { label: string; revenue: number }[]
+
+  if (period === 'hourly') {
+    const byHour = new Map<number, number>()
+    apiData.forEach((p) => byHour.set(Number(p.hour), Number(p.total)))
+    chartData = HOURS.map((h, i) => ({
+      label: h,
+      revenue: byHour.get(i) ?? 0,
+    }))
+  } else {
+    const byMonth = new Map<number, number>()
+    apiData.forEach((p) => byMonth.set(Number(p.month), Number(p.total)))
+    chartData = MONTHS.map((m, i) => ({
+      label: m,
+      revenue: byMonth.get(i + 1) ?? 0,
+    }))
+  }
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Revenue Over Time</CardTitle>
-        <CardDescription>Monthly revenue for the current year</CardDescription>
+      <CardHeader className='flex flex-row items-center justify-between'>
+        <div>
+          <CardTitle>Revenue Over Time</CardTitle>
+          <CardDescription>
+            {period === 'hourly'
+              ? 'Hourly revenue for today'
+              : 'Monthly revenue for the current year'}
+          </CardDescription>
+        </div>
+        <PeriodToggle period={period} onChange={setPeriod} />
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -68,11 +92,12 @@ export function RevenueChart() {
               </defs>
               <CartesianGrid strokeDasharray='3 3' stroke='var(--color-border)' />
               <XAxis
-                dataKey='month'
+                dataKey='label'
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
                 stroke='var(--color-muted-foreground)'
+                interval={period === 'hourly' ? 5 : 0}
               />
               <YAxis
                 fontSize={12}

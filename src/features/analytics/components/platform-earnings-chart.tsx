@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import {
   Area,
@@ -18,6 +19,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useAnalyticsEarnings } from '@/hooks/api/use-analytics'
+import { PeriodToggle } from './period-toggle'
 
 const MONTHS = [
   'Jan',
@@ -34,6 +36,8 @@ const MONTHS = [
   'Dec',
 ]
 
+const HOURS = Array.from({ length: 24 }, (_, i) => `${i}:00`)
+
 function compact(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
@@ -41,28 +45,45 @@ function compact(n: number) {
 }
 
 interface EarningsPoint {
-  month: number
+  month?: number
+  hour?: number
   revenue: number
   earnings: number
 }
 
 export function PlatformEarningsChart() {
-  const { data, isLoading } = useAnalyticsEarnings()
+  const [period, setPeriod] = useState<'monthly' | 'hourly'>('monthly')
+  const { data, isLoading } = useAnalyticsEarnings(period)
   const points: EarningsPoint[] = data?.data ?? []
 
-  const monthMap = new Map(points.map((p) => [p.month, p]))
-  const chartData = MONTHS.map((m, i) => {
-    const p = monthMap.get(i + 1)
-    return { month: m, GMV: p?.revenue ?? 0, Earnings: p?.earnings ?? 0 }
-  })
+  let chartData: { label: string; GMV: number; Earnings: number }[]
+
+  if (period === 'hourly') {
+    const hourMap = new Map(points.map((p) => [p.hour, p]))
+    chartData = HOURS.map((h, i) => {
+      const p = hourMap.get(i)
+      return { label: h, GMV: p?.revenue ?? 0, Earnings: p?.earnings ?? 0 }
+    })
+  } else {
+    const monthMap = new Map(points.map((p) => [p.month, p]))
+    chartData = MONTHS.map((m, i) => {
+      const p = monthMap.get(i + 1)
+      return { label: m, GMV: p?.revenue ?? 0, Earnings: p?.earnings ?? 0 }
+    })
+  }
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Platform Earnings vs GMV</CardTitle>
-        <CardDescription>
-          Monthly gross merchandise value vs platform fee income
-        </CardDescription>
+      <CardHeader className='flex flex-row items-center justify-between'>
+        <div>
+          <CardTitle>Platform Earnings vs GMV</CardTitle>
+          <CardDescription>
+            {period === 'hourly'
+              ? 'Hourly gross merchandise value vs platform fee income for today'
+              : 'Monthly gross merchandise value vs platform fee income'}
+          </CardDescription>
+        </div>
+        <PeriodToggle period={period} onChange={setPeriod} />
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -90,11 +111,12 @@ export function PlatformEarningsChart() {
                 stroke='var(--color-border)'
               />
               <XAxis
-                dataKey='month'
+                dataKey='label'
                 fontSize={11}
                 tickLine={false}
                 axisLine={false}
                 stroke='var(--color-muted-foreground)'
+                interval={period === 'hourly' ? 5 : 0}
               />
               <YAxis
                 fontSize={11}

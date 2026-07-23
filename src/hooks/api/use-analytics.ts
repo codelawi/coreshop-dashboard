@@ -11,31 +11,31 @@ export function useAnalyticsOverview() {
   })
 }
 
-export function useAnalyticsRevenue() {
+export function useAnalyticsRevenue(period: 'monthly' | 'hourly' = 'monthly') {
   return useQuery({
-    queryKey: ['analytics', 'revenue'],
+    queryKey: ['analytics', 'revenue', period],
     queryFn: async () => {
-      const response = await api.get('/analytics/revenue')
+      const response = await api.get('/analytics/revenue', { params: { period } })
       return response.data
     },
   })
 }
 
-export function useAnalyticsOrders() {
+export function useAnalyticsOrders(period: 'monthly' | 'hourly' = 'monthly') {
   return useQuery({
-    queryKey: ['analytics', 'orders'],
+    queryKey: ['analytics', 'orders', period],
     queryFn: async () => {
-      const response = await api.get('/analytics/orders')
+      const response = await api.get('/analytics/orders', { params: { period } })
       return response.data
     },
   })
 }
 
-export function useAnalyticsUsers() {
+export function useAnalyticsUsers(period: 'monthly' | 'hourly' = 'monthly') {
   return useQuery({
-    queryKey: ['analytics', 'users'],
+    queryKey: ['analytics', 'users', period],
     queryFn: async () => {
-      const response = await api.get('/analytics/users')
+      const response = await api.get('/analytics/users', { params: { period } })
       return response.data
     },
   })
@@ -71,11 +71,11 @@ export function useAnalyticsCategories() {
   })
 }
 
-export function useAnalyticsEarnings() {
+export function useAnalyticsEarnings(period: 'monthly' | 'hourly' = 'monthly') {
   return useQuery({
-    queryKey: ['analytics', 'earnings'],
+    queryKey: ['analytics', 'earnings', period],
     queryFn: async () => {
-      const response = await api.get('/analytics/earnings')
+      const response = await api.get('/analytics/earnings', { params: { period } })
       return response.data
     },
   })

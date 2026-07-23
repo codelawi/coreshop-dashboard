@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import {
   Area,
@@ -18,6 +19,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useAnalyticsUsers } from '@/hooks/api/use-analytics'
+import { PeriodToggle } from './period-toggle'
 
 const MONTHS = [
   'Jan',
@@ -34,44 +36,66 @@ const MONTHS = [
   'Dec',
 ]
 
+const HOURS = Array.from({ length: 24 }, (_, i) => `${i}:00`)
+
 interface UserPoint {
-  month: number
+  month?: number
+  hour?: number
   role: string
   total: number
 }
 
 export function CumulativeRegistrationsChart() {
-  const { data, isLoading } = useAnalyticsUsers()
+  const [period, setPeriod] = useState<'monthly' | 'hourly'>('monthly')
+  const { data, isLoading } = useAnalyticsUsers(period)
   const points: UserPoint[] = data?.data ?? []
 
-  const clientsByMonth = new Map<number, number>()
-  const sellersByMonth = new Map<number, number>()
-  points.forEach((p) => {
-    const m = Number(p.month)
-    const t = Number(p.total)
-    if (p.role === 'client') {
-      clientsByMonth.set(m, t)
-    }
-    if (p.role === 'seller') {
-      sellersByMonth.set(m, t)
-    }
-  })
+  let chartData: { label: string; Clients: number; Sellers: number }[]
 
-  let cumClients = 0
-  let cumSellers = 0
-  const chartData = MONTHS.map((m, i) => {
-    cumClients += clientsByMonth.get(i + 1) ?? 0
-    cumSellers += sellersByMonth.get(i + 1) ?? 0
-    return { month: m, Clients: cumClients, Sellers: cumSellers }
-  })
+  if (period === 'hourly') {
+    const clientsByHour = new Map<number, number>()
+    const sellersByHour = new Map<number, number>()
+    points.forEach((p) => {
+      const h = Number(p.hour)
+      const t = Number(p.total)
+      if (p.role === 'client') { clientsByHour.set(h, t) }
+      if (p.role === 'seller') { sellersByHour.set(h, t) }
+    })
+    chartData = HOURS.map((h, i) => ({
+      label: h,
+      Clients: clientsByHour.get(i) ?? 0,
+      Sellers: sellersByHour.get(i) ?? 0,
+    }))
+  } else {
+    const clientsByMonth = new Map<number, number>()
+    const sellersByMonth = new Map<number, number>()
+    points.forEach((p) => {
+      const m = Number(p.month)
+      const t = Number(p.total)
+      if (p.role === 'client') { clientsByMonth.set(m, t) }
+      if (p.role === 'seller') { sellersByMonth.set(m, t) }
+    })
+    let cumClients = 0
+    let cumSellers = 0
+    chartData = MONTHS.map((m, i) => {
+      cumClients += clientsByMonth.get(i + 1) ?? 0
+      cumSellers += sellersByMonth.get(i + 1) ?? 0
+      return { label: m, Clients: cumClients, Sellers: cumSellers }
+    })
+  }
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Cumulative User Growth</CardTitle>
-        <CardDescription>
-          Total platform members accumulated over the year
-        </CardDescription>
+      <CardHeader className='flex flex-row items-center justify-between'>
+        <div>
+          <CardTitle>Cumulative User Growth</CardTitle>
+          <CardDescription>
+            {period === 'hourly'
+              ? 'New clients and sellers per hour today'
+              : 'Total platform members accumulated over the year'}
+          </CardDescription>
+        </div>
+        <PeriodToggle period={period} onChange={setPeriod} />
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -111,11 +135,12 @@ export function CumulativeRegistrationsChart() {
                 stroke='var(--color-border)'
               />
               <XAxis
-                dataKey='month'
+                dataKey='label'
                 fontSize={11}
                 tickLine={false}
                 axisLine={false}
                 stroke='var(--color-muted-foreground)'
+                interval={period === 'hourly' ? 5 : 0}
               />
               <YAxis
                 fontSize={11}

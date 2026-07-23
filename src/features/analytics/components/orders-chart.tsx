@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import {
   Bar,
@@ -16,11 +17,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { PeriodToggle } from './period-toggle'
 
 const MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ]
+
+const HOURS = Array.from({ length: 24 }, (_, i) => `${i}:00`)
 
 const tooltipStyle = {
   background: 'var(--color-popover)',
@@ -30,29 +34,47 @@ const tooltipStyle = {
   fontSize: '12px',
 }
 
-interface MonthlyPoint {
-  month: number
+interface TimeSeriesPoint {
+  month?: number
+  hour?: number
   total: number
 }
 
 export function OrdersChart() {
-  const { data, isLoading } = useAnalyticsOrders()
-  const monthly: MonthlyPoint[] = data?.data?.monthly ?? []
-  const byMonth = new Map<number, number>()
-  monthly.forEach((p) => byMonth.set(Number(p.month), Number(p.total)))
+  const [period, setPeriod] = useState<'monthly' | 'hourly'>('monthly')
+  const { data, isLoading } = useAnalyticsOrders(period)
+  const timeSeries: TimeSeriesPoint[] = data?.data?.time_series ?? []
 
-  const chartData = MONTHS.map((m, i) => ({
-    month: m,
-    orders: byMonth.get(i + 1) ?? 0,
-  }))
+  let chartData: { label: string; orders: number }[]
+
+  if (period === 'hourly') {
+    const byHour = new Map<number, number>()
+    timeSeries.forEach((p) => byHour.set(Number(p.hour), Number(p.total)))
+    chartData = HOURS.map((h, i) => ({
+      label: h,
+      orders: byHour.get(i) ?? 0,
+    }))
+  } else {
+    const byMonth = new Map<number, number>()
+    timeSeries.forEach((p) => byMonth.set(Number(p.month), Number(p.total)))
+    chartData = MONTHS.map((m, i) => ({
+      label: m,
+      orders: byMonth.get(i + 1) ?? 0,
+    }))
+  }
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Orders Over Time</CardTitle>
-        <CardDescription>
-          Monthly order count for the current year
-        </CardDescription>
+      <CardHeader className='flex flex-row items-center justify-between'>
+        <div>
+          <CardTitle>Orders Over Time</CardTitle>
+          <CardDescription>
+            {period === 'hourly'
+              ? 'Hourly order count for today'
+              : 'Monthly order count for the current year'}
+          </CardDescription>
+        </div>
+        <PeriodToggle period={period} onChange={setPeriod} />
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -64,11 +86,12 @@ export function OrdersChart() {
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray='3 3' stroke='var(--color-border)' />
               <XAxis
-                dataKey='month'
+                dataKey='label'
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
                 stroke='var(--color-muted-foreground)'
+                interval={period === 'hourly' ? 5 : 0}
               />
               <YAxis
                 fontSize={12}

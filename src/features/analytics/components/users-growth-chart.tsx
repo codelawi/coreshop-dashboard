@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import {
   CartesianGrid,
@@ -17,11 +18,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { PeriodToggle } from './period-toggle'
 
 const MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ]
+
+const HOURS = Array.from({ length: 24 }, (_, i) => `${i}:00`)
 
 const tooltipStyle = {
   background: 'var(--color-popover)',
@@ -32,36 +36,61 @@ const tooltipStyle = {
 }
 
 interface UserPoint {
-  month: number
+  month?: number
+  hour?: number
   role: string
   total: number
 }
 
 export function UsersGrowthChart() {
-  const { data, isLoading } = useAnalyticsUsers()
+  const [period, setPeriod] = useState<'monthly' | 'hourly'>('monthly')
+  const { data, isLoading } = useAnalyticsUsers(period)
   const points: UserPoint[] = data?.data ?? []
 
-  const clientsByMonth = new Map<number, number>()
-  const sellersByMonth = new Map<number, number>()
+  let chartData: { label: string; clients: number; sellers: number }[]
 
-  points.forEach((p) => {
-    const month = Number(p.month)
-    const total = Number(p.total)
-    if (p.role === 'client') { clientsByMonth.set(month, total) }
-    if (p.role === 'seller') { sellersByMonth.set(month, total) }
-  })
-
-  const chartData = MONTHS.map((m, i) => ({
-    month: m,
-    clients: clientsByMonth.get(i + 1) ?? 0,
-    sellers: sellersByMonth.get(i + 1) ?? 0,
-  }))
+  if (period === 'hourly') {
+    const clientsByHour = new Map<number, number>()
+    const sellersByHour = new Map<number, number>()
+    points.forEach((p) => {
+      const hour = Number(p.hour)
+      const total = Number(p.total)
+      if (p.role === 'client') { clientsByHour.set(hour, total) }
+      if (p.role === 'seller') { sellersByHour.set(hour, total) }
+    })
+    chartData = HOURS.map((h, i) => ({
+      label: h,
+      clients: clientsByHour.get(i) ?? 0,
+      sellers: sellersByHour.get(i) ?? 0,
+    }))
+  } else {
+    const clientsByMonth = new Map<number, number>()
+    const sellersByMonth = new Map<number, number>()
+    points.forEach((p) => {
+      const month = Number(p.month)
+      const total = Number(p.total)
+      if (p.role === 'client') { clientsByMonth.set(month, total) }
+      if (p.role === 'seller') { sellersByMonth.set(month, total) }
+    })
+    chartData = MONTHS.map((m, i) => ({
+      label: m,
+      clients: clientsByMonth.get(i + 1) ?? 0,
+      sellers: sellersByMonth.get(i + 1) ?? 0,
+    }))
+  }
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Users Growth</CardTitle>
-        <CardDescription>New clients and sellers per month</CardDescription>
+      <CardHeader className='flex flex-row items-center justify-between'>
+        <div>
+          <CardTitle>Users Growth</CardTitle>
+          <CardDescription>
+            {period === 'hourly'
+              ? 'Hourly new clients and sellers for today'
+              : 'New clients and sellers per month'}
+          </CardDescription>
+        </div>
+        <PeriodToggle period={period} onChange={setPeriod} />
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -73,11 +102,12 @@ export function UsersGrowthChart() {
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray='3 3' stroke='var(--color-border)' />
               <XAxis
-                dataKey='month'
+                dataKey='label'
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
                 stroke='var(--color-muted-foreground)'
+                interval={period === 'hourly' ? 5 : 0}
               />
               <YAxis
                 fontSize={12}
